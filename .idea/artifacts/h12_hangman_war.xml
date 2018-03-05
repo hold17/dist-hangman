@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="h12.hangman:war">
+    <output-path>$PROJECT_DIR$/out/artifacts/h12_hangman_war</output-path>
+    <root id="archive" name="h12.hangman_war.war">
+      <element id="artifact" artifact-name="h12.hangman:war exploded" />
+    </root>
+  </artifact>
+</component>
