@@ -19,6 +19,14 @@
             <groupId>${parent.groupId}</groupId>
             <artifactId>common</artifactId>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.jsonwebtoken</groupId>-->
+            <!--<artifactId>jjwt</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency> &lt;!&ndash; Dependency for jsonwebtoken &ndash;&gt;-->
+            <!--<groupId>com.fasterxml.jackson.core</groupId>-->
+            <!--<artifactId>jackson-databind</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 
     <build>
