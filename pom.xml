@@ -17,8 +17,13 @@
     </modules>
 
     <repositories>
+        <!--<repository>-->
+            <!--<id>central</id>-->
+            <!--<name>Maven Plugin Repository</name>-->
+            <!--<url>http://repo1.maven.org/maven2</url>-->
+        <!--</repository>-->
         <repository>
-            <id>central</id>
+            <id>internal</id>
             <name>localghost.dk-releases</name>
             <url>http://maven.localghost.dk:8081/artifactory/authwrapper</url>
         </repository>
