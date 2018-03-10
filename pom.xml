@@ -31,8 +31,6 @@
 
     <dependencyManagement>
         <dependencies>
-    <dependencyManagement>
-        <dependencies>
             <dependency>
                 <groupId>${groupId}</groupId>
                 <artifactId>common</artifactId>
