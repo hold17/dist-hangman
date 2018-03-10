@@ -34,14 +34,14 @@ public class hellorest {
             userAdmin = UserAdministrationFactory.getUserAdministration(Speed.LUDICROUS_SPEED);
             user = userAdmin.authenticateUser(username, password);
         } catch (ConnectivityException e) {
-            Error err = new Error();
-            err.setError_type("Connectivity Error");
+            ErrorObj err = new ErrorObj();
+            err.setError_type("Connectivity ErrorObj");
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
         } catch (AuthenticationException e) {
-            Error err = new Error();
-            err.setError_type("Authentication Error");
+            ErrorObj err = new ErrorObj();
+            err.setError_type("Authentication ErrorObj");
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
