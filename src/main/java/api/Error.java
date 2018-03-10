@@ -1,3 +1,5 @@
+package api;
+
 public class Error {
     private String error_type;
     private String error_message;
