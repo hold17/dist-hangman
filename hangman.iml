@@ -8,7 +8,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="authwrapper-1.3.2" level="project" />
     <orderEntry type="library" name="Maven: dk.localghost.hold17:authwrapper:1.3.5" level="project" />
   </component>
 </module>
