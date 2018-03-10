@@ -2,7 +2,7 @@
   <artifact type="jar" name="Hangman_Server:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/Hangman_Server_jar</output-path>
     <root id="archive" name="distributed-hangman-server.jar">
-      <element id="module-output" name="distributed-hangman-server" />
+      <element id="module-output" name="server" />
       <element id="module-output" name="distributed-hangman-common" />
     </root>
   </artifact>

@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-Main-Class: dk.localghost.hold17.client.Client
-
