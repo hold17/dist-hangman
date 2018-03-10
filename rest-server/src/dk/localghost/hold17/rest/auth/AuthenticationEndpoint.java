@@ -14,6 +14,10 @@ import dk.localghost.hold17.rest.api.ErrorObj;
 import dk.localghost.hold17.rest.config.Routes;
 import dk.localghost.hold17.transport.IAuthentication;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -59,4 +63,9 @@ public class AuthenticationEndpoint {
             return Response.status(Response.Status.UNAUTHORIZED).entity(gson.toJson(err)).build();
         }
     }
+
+    @NameBinding
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target({ElementType.TYPE, ElementType.METHOD})
+    public @interface Auth { }
 }

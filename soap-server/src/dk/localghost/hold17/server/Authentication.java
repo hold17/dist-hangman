@@ -43,6 +43,11 @@ public class Authentication implements IAuthentication {
     }
 
     @Override
+    public Boolean validateToken(String token) {
+        return TokenHelper.isTokenValid(token);
+    }
+
+    @Override
     public String getHangmanService(User user) {
         return "http://" + Server.ADDRESS + ":" + Server.PORT + "/" + Server.ADDRESS_HANGMAN + "/" + user.getUsername();
     }

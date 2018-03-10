@@ -1,9 +1,9 @@
 package dk.localghost.hold17.helpers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.localghost.authwrapper.dto.User;
 import dk.localghost.hold17.dto.Token;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 
 import java.security.Key;
@@ -36,5 +36,22 @@ public class TokenHelper {
         token.setUser(user);
 
         return token;
+    }
+
+    public static User getUserFromToken(String accessToken) {
+        final Claims claims = Jwts.parser().setSigningKey(AUTH_KEY).parseClaimsJws(accessToken).getBody();
+        final ObjectMapper objm = new ObjectMapper();
+
+        return objm.convertValue(claims.get(AUTH_CLAIM_USER), User.class);
+    }
+
+    public static boolean isTokenValid(String token) {
+        try {
+            Jwts.parser().setSigningKey(AUTH_KEY).parseClaimsJws(token).getBody();
+        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+            return false;
+        }
+
+        return true;
     }
 }

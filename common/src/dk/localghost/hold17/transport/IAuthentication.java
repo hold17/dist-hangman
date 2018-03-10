@@ -10,6 +10,7 @@ import javax.jws.WebService;
 @WebService
 public interface IAuthentication {
     Token authorize(User user) throws AuthenticationException;
+    Boolean validateToken(String token);
     String getHangmanService(User user);
     void forgotPassword(String userName) throws ConnectivityException;
     void endGame(User user) throws AuthenticationException;

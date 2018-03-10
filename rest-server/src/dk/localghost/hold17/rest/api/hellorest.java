@@ -11,6 +11,7 @@ import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.authwrapper.transport.ConnectivityException;
 import dk.localghost.authwrapper.transport.IUserAdministration;
 import com.google.gson.Gson;
+import dk.localghost.hold17.rest.auth.AuthenticationEndpoint;
 
 @Path("hello")
 public class hellorest {
@@ -48,5 +49,13 @@ public class hellorest {
         }
 
         return Response.ok().entity(gson.toJson(user)).build();
+    }
+
+    @GET
+    @AuthenticationEndpoint.Auth
+    @Path("secure")
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response secureResource() {
+        return Response.ok("This is a secured resource.").build();
     }
 }
