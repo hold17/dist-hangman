@@ -66,7 +66,7 @@ public class HangmanClient {
 
             try {
                 System.out.println("Authenticating...");
-                user = auth.authenticate(userCreds);
+                user = auth.authorize(userCreds);
             } catch (AuthenticationException e) {
                 System.out.println("Wrong username or password.");
                 System.out.println(retries - 1 + " retries left.\n");
@@ -86,7 +86,7 @@ public class HangmanClient {
         
         System.out.println("E-mail sent.");
 
-        throw new AuthenticationException("Failed to authenticate");
+        throw new AuthenticationException("Failed to authorize");
     }
 
     public void startGame() {
@@ -123,7 +123,7 @@ public class HangmanClient {
 
             if (!UserInteraction.getString("Press 'enter' to start a new game or 'q' and 'enter' to exit").toLowerCase().equals("q")) {
                 try {
-                    auth.authenticate(user);
+                    auth.authorize(user);
                     hangman = connectToHangmanService(auth, user);
                 } catch (AuthenticationException|MalformedURLException e) {}
                 startGame();

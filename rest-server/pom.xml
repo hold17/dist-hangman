@@ -28,16 +28,14 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>4.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.9.0</version>
-        </dependency>
-        <dependency> <!-- Dependency for jsonwebtoken -->
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-            <version>2.8.9</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.jsonwebtoken</groupId>-->
+            <!--<artifactId>jjwt</artifactId>-->
+        <!--</dependency>-->
+        <!--<dependency> &lt;!&ndash; Dependency for jsonwebtoken &ndash;&gt;-->
+            <!--<groupId>com.fasterxml.jackson.core</groupId>-->
+            <!--<artifactId>jackson-databind</artifactId>-->
+        <!--</dependency>-->
 
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <dependency>
