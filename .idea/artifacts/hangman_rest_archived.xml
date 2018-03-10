@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="hangman_rest archived">
+    <output-path>$PROJECT_DIR$/out/artifacts/hangman_rest_archived</output-path>
+    <root id="archive" name="hangman_rest archived.war">
+      <element id="artifact" artifact-name="hangman_rest exploded" />
+    </root>
+  </artifact>
+</component>
