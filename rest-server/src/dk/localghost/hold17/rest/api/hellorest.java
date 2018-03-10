@@ -25,6 +25,7 @@ public class hellorest {
     @POST
     @Path("authenticate")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response authenticate(@FormParam("username") String username, @FormParam("password") String password) {
         final IUserAdministration userAdmin;
         final User user;
