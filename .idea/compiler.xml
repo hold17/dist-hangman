@@ -6,11 +6,23 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="client" />
+        <module name="common" />
         <module name="h17hangman" />
+        <module name="rest" />
+        <module name="server" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="client" target="1.8" />
+      <module name="common" target="1.8" />
+      <module name="distributed-hangman-client" target="1.5" />
+      <module name="distributed-hangman-common" target="1.5" />
+      <module name="distributed-hangman-server" target="1.5" />
       <module name="h17hangman" target="1.5" />
+      <module name="hangman" target="1.8" />
+      <module name="rest" target="1.8" />
+      <module name="server" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

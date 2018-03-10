@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/h17hangman.iml" filepath="$PROJECT_DIR$/h17hangman.iml" />
+      <module fileurl="file://$PROJECT_DIR$/client/client.iml" filepath="$PROJECT_DIR$/client/client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/common/common.iml" filepath="$PROJECT_DIR$/common/common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hangman.iml" filepath="$PROJECT_DIR$/hangman.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rest-server/rest-server.iml" filepath="$PROJECT_DIR$/rest-server/rest-server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/soap-server/soap-server.iml" filepath="$PROJECT_DIR$/soap-server/soap-server.iml" />
     </modules>
   </component>
 </project>
