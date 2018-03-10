@@ -1,3 +1,5 @@
+package dk.localghost.hold17.server.rest;
+
 public class Error {
     private String error_type;
     private String error_message;

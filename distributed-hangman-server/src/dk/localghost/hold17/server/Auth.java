@@ -1,0 +1,39 @@
+package dk.localghost.hold17.server;
+
+import authwrapper.dto.Speed;
+import authwrapper.dto.User;
+import authwrapper.helper.UserAdministrationFactory;
+import authwrapper.transport.IUserAdministration;
+import authwrapper.transport.AuthenticationException;
+import authwrapper.transport.ConnectivityException;
+
+public class Auth {
+
+    private static IUserAdministration getUseradministration() throws ConnectivityException{
+        return UserAdministrationFactory.getUserAdministration(Speed.LUDICROUS_SPEED); // Ludicrous = rmi, slow = soap
+    }
+
+    public static User signIn(String username, String password) throws AuthenticationException {
+        try {
+            IUserAdministration ua = getUseradministration();
+            return ua.authenticateUser(username, password);
+        } catch (ConnectivityException e) {
+            System.out.println("Failed to contact server. " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    public static void forgotPassword(String username) throws ConnectivityException{
+        System.out.println("Sending forgotten password e-mail...");
+
+        try {
+            IUserAdministration ua = getUseradministration();
+            ua.sendForgottenPasswordEmail(username, "You clearly forgot your password, stupid.");
+        } catch (ConnectivityException e) {
+            throw new ConnectivityException("Failed to contact server. " + e.getMessage());
+        }
+
+        System.out.println("E-mail has been successfully sent.");
+    }
+}

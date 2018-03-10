@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/h17hangman.iml" filepath="$PROJECT_DIR$/h17hangman.iml" />
+      <module fileurl="file://$PROJECT_DIR$/distributed-hangman-client/distributed-hangman-client.iml" filepath="$PROJECT_DIR$/distributed-hangman-client/distributed-hangman-client.iml" />
+      <module fileurl="file://$PROJECT_DIR$/distributed-hangman-common.iml" filepath="$PROJECT_DIR$/distributed-hangman-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/distributed-hangman-server/distributed-hangman-server.iml" filepath="$PROJECT_DIR$/distributed-hangman-server/distributed-hangman-server.iml" />
     </modules>
   </component>
 </project>

@@ -32,12 +32,12 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>tech.wiberg.authwrapper</groupId>
-            <artifactId>DistAuthWrapper</artifactId>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/DistAuthWrapper.jar</systemPath>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>tech.wiberg.authwrapper</groupId>-->
+            <!--<artifactId>DistAuthWrapper</artifactId>-->
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${project.basedir}/DistAuthWrapper.jar</systemPath>-->
+        <!--</dependency>-->
     </dependencies>
 
 </project>
