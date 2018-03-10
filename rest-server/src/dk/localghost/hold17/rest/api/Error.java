@@ -1,4 +1,4 @@
-package dk.localghost.hold17.server.api;
+package dk.localghost.hold17.rest.api;
 
 public class Error {
     private String error_type;

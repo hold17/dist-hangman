@@ -1,4 +1,4 @@
-package dk.localghost.hold17.server.api;
+package dk.localghost.hold17.rest.api;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
