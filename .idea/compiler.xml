@@ -9,8 +9,8 @@
         <module name="client" />
         <module name="common" />
         <module name="h17hangman" />
-        <module name="rest" />
-        <module name="server" />
+        <module name="rest-server" />
+        <module name="soap-server" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -21,8 +21,8 @@
       <module name="distributed-hangman-server" target="1.5" />
       <module name="h17hangman" target="1.5" />
       <module name="hangman" target="1.8" />
-      <module name="rest" target="1.8" />
-      <module name="server" target="1.8" />
+      <module name="rest-server" target="1.8" />
+      <module name="soap-server" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
