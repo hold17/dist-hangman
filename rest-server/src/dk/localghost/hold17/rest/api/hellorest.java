@@ -6,6 +6,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import com.google.gson.Gson;
+
+import java.net.MalformedURLException;
 
 import dk.localghost.authwrapper.dto.Speed;
 import dk.localghost.authwrapper.dto.User;
@@ -13,11 +16,8 @@ import dk.localghost.authwrapper.helper.UserAdministrationFactory;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.authwrapper.transport.ConnectivityException;
 import dk.localghost.authwrapper.transport.IUserAdministration;
-import com.google.gson.Gson;
 import dk.localghost.hold17.helpers.AuthorizationHelper;
 import dk.localghost.hold17.rest.auth.AuthenticationEndpoint;
-
-import java.net.MalformedURLException;
 
 @Path("hello")
 public class hellorest {
