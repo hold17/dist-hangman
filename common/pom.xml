@@ -15,6 +15,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>dk.localghost.hold17</groupId>
+            <artifactId>authwrapper</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
         </dependency>
