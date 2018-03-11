@@ -1,10 +1,6 @@
 package dk.localghost.hold17.rest.auth;
 
-import dk.localghost.authwrapper.dto.User;
-import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.AuthorizationHelper;
-import dk.localghost.hold17.helpers.TokenHelper;
-import dk.localghost.hold17.transport.IAuthentication;
 
 import javax.annotation.Priority;
 import javax.ws.rs.NotAuthorizedException;
