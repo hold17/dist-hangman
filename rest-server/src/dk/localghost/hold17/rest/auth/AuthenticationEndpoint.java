@@ -7,24 +7,15 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 
 import com.google.gson.Gson;
-import dk.localghost.authwrapper.dto.Speed;
 import dk.localghost.authwrapper.dto.User;
-import dk.localghost.authwrapper.helper.UserAdministrationFactory;
 import dk.localghost.authwrapper.transport.AuthenticationException;
-import dk.localghost.authwrapper.transport.ConnectivityException;
-import dk.localghost.authwrapper.transport.IUserAdministration;
 import dk.localghost.hold17.dto.Token;
-import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.rest.api.ErrorObj;
-import dk.localghost.hold17.rest.config.AuthConfig;
 import dk.localghost.hold17.rest.config.Routes;
 import dk.localghost.hold17.transport.IAuthentication;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
 
 //@Path(Routes.OAUTH_ROOT)
 @Path(Routes.OAUTH_AUTHORIZE)
