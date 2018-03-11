@@ -25,7 +25,7 @@ public class AuthenticationEndpoint {
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response authorize2(@FormParam("username") String username, @FormParam("password") String password) {
+    public Response authorize(@FormParam("username") String username, @FormParam("password") String password) {
         try {
             Token token = AuthorizationHelper.getAuthService().authorize(new User(username, password));
 
