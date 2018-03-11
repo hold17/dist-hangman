@@ -18,19 +18,11 @@
 
     <repositories>
         <repository>
-            <id>central</id>
+            <id>internal</id>
             <name>localghost.dk-releases</name>
             <url>http://maven.localghost.dk:8081/artifactory/authwrapper</url>
         </repository>
     </repositories>
-
-    <dependencies>
-        <dependency>
-            <groupId>dk.localghost.hold17</groupId>
-            <artifactId>authwrapper</artifactId>
-            <version>1.3.5</version>
-        </dependency>
-    </dependencies>
 
     <dependencyManagement>
         <dependencies>
@@ -38,6 +30,11 @@
                 <groupId>${groupId}</groupId>
                 <artifactId>common</artifactId>
                 <version>${version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dk.localghost.hold17</groupId>
+                <artifactId>authwrapper</artifactId>
+                <version>1.3.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
