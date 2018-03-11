@@ -66,7 +66,7 @@ public class HangmanClient {
 
             try {
                 System.out.println("Authenticating...");
-                user = auth.authorize(userCreds);
+                user = auth.getUserFromToken(auth.authorize(userCreds).getAccess_token());
             } catch (AuthenticationException e) {
                 System.out.println("Wrong username or password.");
                 System.out.println(retries - 1 + " retries left.\n");
