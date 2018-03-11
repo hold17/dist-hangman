@@ -3,6 +3,8 @@ package dk.localghost.hold17.server;
 import dk.localghost.authwrapper.dto.User;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.authwrapper.transport.ConnectivityException;
+import dk.localghost.hold17.dto.Token;
+import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.transport.IAuthentication;
 
 import javax.jws.WebService;
@@ -18,9 +20,11 @@ public class Authentication implements IAuthentication {
     }
 
     @Override
-    public User authenticate(User user) throws AuthenticationException {
+    public Token authorize(User user) throws AuthenticationException {
+        final User validUser;
+
         try {
-            User validUser = Auth.signIn(user.getUsername(), user.getPassword());
+            validUser = Auth.signIn(user.getUsername(), user.getPassword());
 
             HangmanLogic hangman = new HangmanLogic();
             if (hangmanServices.get(user.getUsername()) == null) {
@@ -31,10 +35,21 @@ public class Authentication implements IAuthentication {
                 System.out.println(user.getUsername() + " rejoined a game.");
             }
 
-            return validUser;
         } catch (AuthenticationException e) {
             throw new AuthenticationException(e.getMessage(), e.getCause());
         }
+
+        return TokenHelper.issueToken(validUser);
+    }
+
+    @Override
+    public Boolean validateToken(String token) {
+        return TokenHelper.isTokenValid(token);
+    }
+
+    @Override
+    public User getUserFromToken(String token) {
+        return TokenHelper.getUserFromToken(token);
     }
 
     @Override
