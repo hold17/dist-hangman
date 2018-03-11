@@ -41,10 +41,6 @@
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>dk.localghost.hold17</groupId>
-            <artifactId>authwrapper</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
