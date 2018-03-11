@@ -1,16 +1,16 @@
 package dk.localghost.hold17.rest.api;
 
-public class Error {
+public class ErrorObj {
     private String error_type;
     private String error_message;
 
-    public Error() { }
+    public ErrorObj() { }
 
-    public Error(String error_message) {
+    public ErrorObj(String error_message) {
         this.error_message = error_message;
     }
 
-    public Error(String error_type, String error_message) {
+    public ErrorObj(String error_type, String error_message) {
         this.error_type = error_type;
         this.error_message = error_message;
     }
