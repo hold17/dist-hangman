@@ -19,7 +19,7 @@ public class TokenHelper {
         final Date today = new Date();
         final Date expiration = new Date(today.getTime() + (1000 * 60 * 60)); // One hour expiration
 
-        user.setPassword(null);
+//        user.setPassword(null);
 
         String jwtToken = Jwts.builder()
                 .setIssuedAt(today)
