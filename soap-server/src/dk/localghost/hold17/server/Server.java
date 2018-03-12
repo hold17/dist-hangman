@@ -1,6 +1,6 @@
 package dk.localghost.hold17.server;
 
-import dk.localghost.hold17.server.database.Database;
+//import dk.localghost.hold17.server.database.Database;
 import dk.localghost.hold17.transport.IAuthentication;
 
 import javax.xml.ws.Endpoint;
@@ -10,7 +10,7 @@ public class Server {
     public static String ADDRESS = "[::]";
     public static final String ADDRESS_AUTH = "auth";
     public static final String ADDRESS_HANGMAN = "hangman";
-    public static Database database = new Database();
+    //public static Database database = new Database();
 
     public static void main(String[] args) {
         if (args.length != 2) {
@@ -33,6 +33,6 @@ public class Server {
         Endpoint.publish("http://" + ADDRESS + ":" + PORT + "/" + ADDRESS_AUTH, auth);
         System.out.println("Server started on " + ADDRESS + " port " + PORT);
 
-        database.doStuff();
+        //database.doStuff();
     }
 }

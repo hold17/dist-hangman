@@ -40,7 +40,7 @@ public class Authentication implements IAuthentication {
             HangmanLogic hangman = new HangmanLogic();
             Endpoint endpoint = Endpoint.publish(getHangmanServiceURL(token), hangman);
 
-            System.out.println(userName + " created a new game. Word is: " + hangman.getWord());
+            System.out.println(userName + " created a new game.");
             hangmanServices.put(userName, endpoint);
         } else {
             System.out.println(userName + " rejoined a game.");

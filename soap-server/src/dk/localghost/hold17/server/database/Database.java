@@ -1,6 +1,6 @@
 package dk.localghost.hold17.server.database;
 
-import dk.localghost.hold17.server.database.data.Highscore;
+import dk.localghost.hold17.server.database.data.HighScore;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -29,16 +29,16 @@ public class Database {
     public void doStuff() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
-        entityManager.persist( new Highscore( "Bob", new Date() , 123) );
-        entityManager.persist( new Highscore( "Robert", new Date(), 234) );
+        entityManager.persist( new HighScore( new Date(), "Bob", 123 , 420, "bigword", "qtyshj") );
+        entityManager.persist( new HighScore( new Date(), "Robert", 234, 69, "biggerword", "mnzxlk") );
         entityManager.getTransaction().commit();
         entityManager.close();
 
         entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
-        List<Highscore> result = entityManager.createQuery("from Highscore", Highscore.class).getResultList();
-        for (Highscore highscore : result) {
-            System.out.println("Highscore (" + highscore.getDate() + ") : playerName: " + highscore.getPlayerName() + " : score: " + highscore.getScore());
+        List<HighScore> result = entityManager.createQuery("from HighScore", HighScore.class).getResultList();
+        for (HighScore highScore : result) {
+            System.out.println("HighScore (" + highScore.getDate() + ") : playerName: " + highScore.getPlayerName() + " : score: " + highScore.getScore());
         }
         entityManager.getTransaction().commit();
         entityManager.close();

@@ -93,6 +93,7 @@ public class HangmanClient {
 
     public void startGame() throws AuthenticationException {
         if (hangman == null) throw new NullPointerException("Connection to server was unsuccessful, hangman object is still null.");
+        if (!hangman.hasGameBegun()) hangman.startNewGame(token);
             while(!hangman.isGameOver()) {
                 System.out.println("Game has started. The word has " + hangman.getVisibleWord().length() + " letters.\n");
                 displayStatus();
@@ -114,13 +115,15 @@ public class HangmanClient {
                 }
             }
 
+            hangman.logStatus();
             System.out.println("Game was " + (hangman.isGameWon() ? "won" : "lost") + ". \n\n");
-            hangman.reset(token);
-
+            System.out.println("Your final score was " + hangman.getCurrentScore() + " with a time of " + hangman.getFormattedTime());
             if (!UserInteraction.getString("Press 'enter' to start a new game or 'q' and 'enter' to exit").toLowerCase().equals("q")) {
-                try {
+/*                try {
                     hangman = connectToHangmanService(auth, token);
-                } catch (MalformedURLException e) {}
+                } catch (MalformedURLException e) {}*/
+                if (hangman.isGameLost())
+                    hangman.resetScoreAndTime(token);
                 startGame();
             } else {
                 auth.endGame(token);

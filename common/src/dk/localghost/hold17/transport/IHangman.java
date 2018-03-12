@@ -14,15 +14,20 @@ public interface IHangman {
     ArrayList<String> getPossibleWords();
     ArrayList<String> getUsedLetters();
     String getUsedLettersStr();
+    String getUniqueLettersOfWord();
     int getWrongLettersCount();
+    int getCurrentScore();
+    long getCurrentTime();
     boolean isLastLetterCorrect();
     boolean isGameWon();
     boolean isGameLost();
     boolean isGameOver();
+    boolean hasGameBegun();
+    void startNewGame(Token token) throws AuthenticationException;
     void reset(Token token) throws AuthenticationException;
+    void resetScoreAndTime(Token token) throws AuthenticationException;
     void guess(String givenLetter, Token token) throws AuthenticationException;
     void logStatus();
     void getWordsFromWeb(String url, Token token) throws IOException, AuthenticationException;
-    double calculateScore();
-    String uniqueLettersOfWord();
+    String getFormattedTime();
 }

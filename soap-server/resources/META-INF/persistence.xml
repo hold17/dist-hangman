@@ -10,7 +10,7 @@
 
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <class>dk.localghost.hold17.server.database.data.Highscore</class>
+        <class>dk.localghost.hold17.server.database.data.HighScore</class>
 
         <properties>
             <property name="javax.persistence.jdbc.driver"
