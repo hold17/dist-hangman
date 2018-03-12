@@ -26,7 +26,7 @@ public class Authentication implements IAuthentication {
         try {
             validUser = Auth.signIn(user.getUsername(), user.getPassword());
 
-            HangmanLogic hangman = new HangmanLogic();
+                      HangmanLogic hangman = new HangmanLogic();
             if (hangmanServices.get(user.getUsername()) == null) {
                 Endpoint endpoint = Endpoint.publish(getHangmanService(validUser), hangman);
                 System.out.println(user.getUsername() + " created a new game. Word is: " + hangman.getWord());

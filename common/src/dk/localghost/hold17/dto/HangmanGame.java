@@ -70,4 +70,13 @@ public class HangmanGame {
     public void setGameOver(boolean gameOver) {
         isGameOver = gameOver;
     }
+
+    public void setGame(IHangman hangman) {
+        this.setLastGuessedLetterIsCorrect(hangman.isLastLetterCorrect());
+        this.setUsedLetters(hangman.getUsedLetters());
+        this.setVisibleWord(hangman.getVisibleWord());
+        this.setGameHasBeenLost(hangman.isGameLost());
+        this.setGameHasBeenWon(hangman.isGameWon());
+        this.setGameOver(hangman.isGameOver());
+    }
 }
