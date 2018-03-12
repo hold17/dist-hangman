@@ -1,8 +1,5 @@
 package dk.localghost.hold17.helpers;
 
-import com.sun.istack.internal.Nullable;
-import dk.localghost.authwrapper.dto.User;
-import dk.localghost.hold17.dto.HangmanGame;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.transport.IAuthentication;
 import dk.localghost.hold17.transport.IHangman;
@@ -18,7 +15,7 @@ public class HangmanHelper {
         URL hangUrl = null;
         try {
             auth = AuthorizationHelper.getAuthService();
-            token.setUser(auth.getUserFromToken(token));
+            token = auth.extractToken(token);
 
             hangUrl = new URL( auth.getHangmanServiceURL(token) + "?wsdl");
         } catch(MalformedURLException ex) {
