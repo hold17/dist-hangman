@@ -1,5 +1,6 @@
 package dk.localghost.hold17.helpers;
 
+import com.sun.istack.internal.Nullable;
 import dk.localghost.authwrapper.dto.User;
 import dk.localghost.hold17.dto.HangmanGame;
 import dk.localghost.hold17.dto.Token;
@@ -12,7 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class HangmanHelper {
-    public static IHangman getHangmanService(Token token) {
+    public static IHangman getHangmanService(Token token, Boolean get) {
         IAuthentication auth = null;
         URL hangUrl = null;
         try {
@@ -22,6 +23,11 @@ public class HangmanHelper {
             hangUrl = new URL( auth.getHangmanServiceURL(token) + "?wsdl");
         } catch(MalformedURLException ex) {
             // TODO: Remove after Sebastian's commit
+        }
+
+        if(!auth.isGameCreated(token)) {
+            if(get) { return null; }
+            auth.createHangmanService(token);
         }
 
         QName hangQname = new QName("http://server.hold17.localghost.dk/", "HangmanLogicService");

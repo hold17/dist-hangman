@@ -9,6 +9,7 @@ import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.rest.auth.AuthenticationEndpoint;
 import dk.localghost.hold17.transport.IHangman;
 
+import javax.lang.model.type.ErrorType;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -32,7 +33,7 @@ public class HangmanRest {
         Token token = new Token();
         token.setAccess_token(tokenStr);
 
-        IHangman hangman = HangmanHelper.getHangmanService(token);
+        IHangman hangman = HangmanHelper.getHangmanService(token, false);
         try {
             hangman.reset(token);
         } catch(AuthenticationException ex) {
@@ -57,8 +58,11 @@ public class HangmanRest {
         Token token = new Token();
         token.setAccess_token(tokenStr);
 
-        IHangman hangman = HangmanHelper.getHangmanService(token);
-
+        IHangman hangman = HangmanHelper.getHangmanService(token, true);
+        if(hangman == null) {
+            String errMsg = "A game has not yet been created.";
+            return Response.status(400).entity(errMsg).build();
+        }
         HangmanGame game = new HangmanGame();
         game.setGame(hangman);
 
@@ -80,7 +84,7 @@ public class HangmanRest {
         Token token = new Token();
         token.setAccess_token(tokenStr);
 
-        IHangman hangman = HangmanHelper.getHangmanService(token);
+        IHangman hangman = HangmanHelper.getHangmanService(token, false);
 
         try {
             hangman.guess(letter, token);
