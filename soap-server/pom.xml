@@ -47,9 +47,6 @@
         <resources>
             <resource>
                 <directory>resources</directory>
-                <includes>
-                    <include>META-INF/persistence.xml</include>
-                </includes>
             </resource>
         </resources>
     </build>

@@ -3,6 +3,7 @@ package dk.localghost.hold17.server;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.TokenHelper;
+import dk.localghost.hold17.server.database.data.HighScore;
 import dk.localghost.hold17.transport.IHangman;
 
 import javax.jws.WebService;
@@ -10,10 +11,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @WebService(endpointInterface = "dk.localghost.hold17.transport.IHangman")
 public class HangmanLogic implements IHangman {
@@ -26,13 +25,21 @@ public class HangmanLogic implements IHangman {
     private boolean lastGuessedLetterIsCorrect;
     private boolean gameHasBeenWon;
     private boolean gameHasBeenLost;
+    private boolean hasGameBegun;
     private long timeStart, timeStop;
+    private long currentTime;
+    private long totalTime;
+    private int currentScore;
+    private int totalScore;
 
     public HangmanLogic() {
+        this.hasGameBegun = false;
         addDemoData();
-        reset(); // This is the only place reset() without a user may be called...
+        reset();
     }
 
+    // this is never used because the service is always open until manually closed
+    // and no save game handling is implemented
     public HangmanLogic(HangmanLogic hangman) {
         this.possibleWords = hangman.getPossibleWords();
         this.word = hangman.getWord();
@@ -59,6 +66,18 @@ public class HangmanLogic implements IHangman {
     public int getWrongLettersCount() {
         return this.wrongLettersCount;
     }
+    public long getTotalTime() {
+        return this.totalTime;
+    }
+    public long getCurrentTime() {
+        return this.currentTime;
+    }
+    public int getTotalScore() {
+        return this.totalScore;
+    }
+    public int getCurrentScore() {
+        return this.currentScore;
+    }
 
     // gamestate checks
     public boolean isLastLetterCorrect() {
@@ -73,6 +92,55 @@ public class HangmanLogic implements IHangman {
     public boolean isGameOver() {
         return this.gameHasBeenLost || this.gameHasBeenWon;
     }
+    public boolean hasGameBegun() {
+        return this.hasGameBegun;
+    }
+
+    private void updateTotalTime() {
+        this.totalTime += this.currentTime;
+    }
+    private void updateCurrentTime() {
+        this.currentTime = timeStop - timeStart;
+    }
+    private void updateTotalScore() {
+        this.totalScore += this.currentScore;
+    }
+    private void updateCurrentScore() {
+        this.currentScore = calculateScore(this.currentTime);
+    }
+
+    public void startNewGame(Token token) throws AuthenticationException {
+        reset(token);
+        word = possibleWords.get(new Random().nextInt(possibleWords.size()));
+        updateVisibleWord();
+        this.hasGameBegun = true;
+        System.out.println(token.getUser().getUsername() + " started a new game. The new word is " + this.word);
+        timeStart = System.currentTimeMillis();
+    }
+
+    public void reset(Token token) throws AuthenticationException {
+        authenticateUserToken(token);
+        reset();
+    }
+
+    private void reset() {
+        usedLetters.clear();
+        wrongLettersCount = 0;
+        correctlyGuessedLettersCount = 0;
+        gameHasBeenWon = false;
+        gameHasBeenLost = false;
+    }
+
+    public void resetScoreAndTime(Token token) throws AuthenticationException {
+        authenticateUserToken(token);
+        this.timeStop = 0;
+        this.timeStart = 0;
+        this.totalTime = 0;
+        this.currentTime = 0;
+        this.totalScore = 0;
+        this.currentScore = 0;
+        System.out.println(token.getUser().getUsername() + " reset their score after a lost game");
+    }
 
     private void addDemoData() {
         possibleWords.clear();
@@ -85,23 +153,6 @@ public class HangmanLogic implements IHangman {
         possibleWords.add("walkway");
         possibleWords.add("snail");
         possibleWords.add("bird");
-    }
-
-    public void reset(Token token) throws AuthenticationException {
-        authenticateUserToken(token);
-        reset();
-        System.out.println(token.getUser().getUsername() + " started a new game. The new word is " + this.word);
-    }
-
-    private void reset() {
-        usedLetters.clear();
-        wrongLettersCount = 0;
-        correctlyGuessedLettersCount = 0;
-        gameHasBeenWon = false;
-        gameHasBeenLost = false;
-        word = possibleWords.get(new Random().nextInt(possibleWords.size()));
-        updateVisibleWord();
-        timeStart = System.currentTimeMillis();
     }
 
     private void updateVisibleWord() {
@@ -138,16 +189,29 @@ public class HangmanLogic implements IHangman {
             lastGuessedLetterIsCorrect = true;
             if (word.length() == correctlyGuessedLettersCount) {
                 gameHasBeenWon = true;
-                timeStop = System.currentTimeMillis();
             }
         } else {
             lastGuessedLetterIsCorrect = false;
             wrongLettersCount++;
             if (wrongLettersCount > 6) {
                 gameHasBeenLost = true;
-                timeStop = System.currentTimeMillis();
             }
         }
+
+        if (isGameOver()) {
+            timeStop = System.currentTimeMillis();
+            updateCurrentTime();
+            updateCurrentScore();
+            this.hasGameBegun = false;
+        }
+    }
+
+    // create simple highscore for single game
+    public HighScore createHighscore(Token token, int score, int time) {
+        HighScore highScore = new HighScore(
+            new Date(), token.getUser().getUsername(), score, time, this.getWord(), this.getWrongLettersStr()
+        );
+        return highScore;
     }
 
     public void logStatus() {
@@ -156,8 +220,17 @@ public class HangmanLogic implements IHangman {
         System.out.println("- visibleWord = " + visibleWord);
         System.out.println("- wrongLettersCount = " + wrongLettersCount);
         System.out.println("- usedLetters = " + usedLetters);
-        if (gameHasBeenLost) System.out.println("- GAME LOST");
-        if (gameHasBeenWon) {System.out.println("- GAME WON"); System.out.println(" - Score = " + this.calculateScore() + " || " + this.calcScore()); }
+        System.out.println("- uniqueLettersOfWord = " + getUniqueLettersOfWord());
+        if (gameHasBeenLost) {
+            System.out.println("- GAME LOST");
+            System.out.println(" - Score = " + this.currentScore);
+            System.out.println(" - Time = " + this.currentTime);
+        }
+        else if (gameHasBeenWon) {
+            System.out.println("- GAME WON");
+            System.out.println(" - Score = " + this.currentScore);
+            System.out.println(" - Time = " + this.currentTime);
+        }
 
         System.out.println("----------");
     }
@@ -199,29 +272,28 @@ public class HangmanLogic implements IHangman {
         reset(token);
     }
 
-    public double calculateScore() {
-        if (!this.isGameOver()) return -1.0;
-
-        final int lengthOfWord = this.word.length();
-        final int uniqueLetterCount = this.uniqueLettersOfWord().length();
+    private int calculateScore(long time) {
+        final long timeInMillis = time;
+        final int WordLength = this.word.length();
+        final int uniqueLetterCount = this.getUniqueLettersOfWord().length();
         final int wrongGuessCount = this.wrongLettersCount;
 
-        final double score = (lengthOfWord + uniqueLetterCount) / (wrongGuessCount + 1);
+        int baseTimeScore = 50; // some magic number we find appropriate
+        int baseLetterScore = 50; // ----||----
 
-        return score;
-    }
+        int bestTime = WordLength*50; // should vary with word length. Maybe do something more exciting
+        int bestLetters = uniqueLetterCount; // this should maybe be another metric also taking into account how difficult the word is
 
-    private int calcScore() {
-        long timeInMillis = timeStop - timeStart;
+        float A = 0.9f; // higher number means bigger penalty for bad performance
+        float B = 0.9f; // ----||----
 
-        final int lengthOfWord = this.word.length();
-        final int uniqueLetterCount = this.uniqueLettersOfWord().length();
-        final int wrongGuessCount = this.wrongLettersCount;
+        // Fucking plot this shit to figure out some numbers that work
+        // Find a way around actual time being higher than best time messing shit up
+        int letterScore = (int) Math.round(baseLetterScore * Math.pow(A, (bestLetters - wrongGuessCount)));
+        int timeScore = (int) Math.round(baseTimeScore * Math.pow(B, (bestTime - Math.round(timeInMillis/100))));
 
-        System.out.println("time: " + Math.round(timeInMillis/1000));
-        // I'm tired so this score calc sucks...
-        int score = (int) Math.round(Math.round(timeInMillis/100) * Math.pow(0.9, (lengthOfWord - wrongGuessCount) + uniqueLetterCount));
-        System.out.println("score: " + score);
+        // throw a this into a Math.sqrt() to really fuck over bad players
+        int score = letterScore + timeScore;
 
         return score;
     }
@@ -234,21 +306,47 @@ public class HangmanLogic implements IHangman {
         return sb.toString();
     }
 
-    public String uniqueLettersOfWord() {
+    public String getUniqueLettersOfWord() {
         StringBuilder uniqueLetters = new StringBuilder();
 
-        for (int i = 0; i < this.word.length(); i++) {
+        for (int i=0; i < this.word.length(); i++) {
             char current = this.word.charAt(i);
             if (uniqueLetters.toString().indexOf(current) < 0)
                 uniqueLetters.append(current);
-            else
-                uniqueLetters = new StringBuilder(uniqueLetters.toString().replace(String.valueOf(current), ""));
         }
+
         return uniqueLetters.toString();
     }
 
-    private static void authenticateUserToken(Token token) throws AuthenticationException{
+    public String getWrongLettersStr() {
+        StringBuilder sb = new StringBuilder();
+        for (String l : this.usedLetters) {
+            if (word.contains(l)) continue;
+            sb.append(l);
+        }
+        return sb.toString();
+    }
+
+    private static void authenticateUserToken(Token token) throws AuthenticationException {
         if (!TokenHelper.isTokenValid(token))
             throw new AuthenticationException("Failed to authenticate user token.");
+    }
+
+    public String getFormattedTime() {
+        long time = this.currentTime;
+        long minutes = time / TimeUnit.MINUTES.toMillis(1);
+        long seconds = time % TimeUnit.MINUTES.toMillis(1) / TimeUnit.SECONDS.toMillis(1);
+        long millis = time % TimeUnit.SECONDS.toMillis(1);
+
+        String formatted = String.format("%02d", minutes) +
+                String.format(":%02d", seconds) +
+                String.format(".%03d", millis);
+
+        return formatted;
+    }
+
+    public boolean isGameActive(Token token) throws AuthenticationException {
+        authenticateUserToken(token);
+        return this.timeStart > 0;
     }
 }
