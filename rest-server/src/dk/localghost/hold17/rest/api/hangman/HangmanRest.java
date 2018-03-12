@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 
 @Path("hangman")
 public class HangmanRest {
-        private static final Gson gson = new Gson();
+    private static final Gson gson = new Gson();
 
     //Start new game
     @AuthenticationEndpoint.Auth
