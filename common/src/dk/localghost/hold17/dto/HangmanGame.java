@@ -72,6 +72,7 @@ public class HangmanGame {
     }
 
     public void setGame(IHangman hangman) {
+        this.setWrongLettersCount(hangman.getWrongLettersCount());
         this.setLastGuessedLetterIsCorrect(hangman.isLastLetterCorrect());
         this.setUsedLetters(hangman.getUsedLetters());
         this.setVisibleWord(hangman.getVisibleWord());

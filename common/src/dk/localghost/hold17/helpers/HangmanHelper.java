@@ -17,9 +17,9 @@ public class HangmanHelper {
         URL hangUrl = null;
         try {
             auth = AuthorizationHelper.getAuthService();
-            token.setUser(auth.getUserFromToken(token.getAccess_token()));
+            token.setUser(auth.getUserFromToken(token));
 
-            hangUrl = new URL( auth.getHangmanService(token.getUser()) + "?wsdl");
+            hangUrl = new URL( auth.getHangmanServiceURL(token) + "?wsdl");
         } catch(MalformedURLException ex) {
             // TODO: Remove after Sebastian's commit
         }
