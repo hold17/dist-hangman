@@ -22,7 +22,7 @@ public class HangmanHelper {
 
             hangUrl = new URL( auth.getHangmanServiceURL(token) + "?wsdl");
         } catch(MalformedURLException ex) {
-            // TODO: Remove after Sebastian's commit
+
         }
 
         if(!auth.isGameCreated(token)) {

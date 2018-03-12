@@ -7,34 +7,44 @@ import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table( name = "HIGHSCORES" )
-public class Highscore {
+public class HighScore {
     @Id
     @GeneratedValue(generator="increment")
     @GenericGenerator(name="increment", strategy = "increment")
     private Long id;
-
-    @Basic
-    private String playerName;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "HIGHSCORE_DATE")
     private Date date;
 
     @Basic
+    private String playerName;
+
+    @Basic
     private int score;
 
+    @Basic
+    private int time;
 
-    public Highscore() {
+    @Basic
+    private String correctWord;
+
+    @Basic
+    private String wrongLetters;
+
+    public HighScore() {
         // this form used by Hibernate
     }
 
-    public Highscore(String playerName, Date date, int score) {
+    public HighScore(Date date, String playerName, int score, int time, String correctWord, String wrongLetters) {
         // for application use, to create new events
-        this.playerName = playerName;
         this.date = date;
+        this.playerName = playerName;
         this.score = score;
+        this.time = time;
+        this.correctWord = correctWord;
+        this.wrongLetters = wrongLetters;
     }
-
 
     public Long getId() {
         return id;
@@ -42,14 +52,6 @@ public class Highscore {
 
     private void setId(Long id) {
         this.id = id;
-    }
-
-    public String getPlayerName() {
-        return playerName;
-    }
-
-    public void setPlayerName(String playerName) {
-        this.playerName = playerName;
     }
 
     public Date getDate() {
@@ -60,12 +62,44 @@ public class Highscore {
         this.date = date;
     }
 
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+
     public int getScore() {
         return score;
     }
 
     public void setScore(int score) {
         this.score = score;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+    public String getCorrectWord() {
+        return correctWord;
+    }
+
+    public void setCorrectWord(String correctWord) {
+        this.correctWord = correctWord;
+    }
+
+    public String getWrongLetters() {
+        return wrongLetters;
+    }
+
+    public void setWrongLetters(String wrongLetters) {
+        this.wrongLetters = wrongLetters;
     }
 
 }

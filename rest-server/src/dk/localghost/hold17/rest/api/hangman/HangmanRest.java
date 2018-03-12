@@ -6,6 +6,7 @@ import dk.localghost.hold17.dto.HangmanGame;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.HangmanHelper;
 import dk.localghost.hold17.helpers.TokenHelper;
+import dk.localghost.hold17.rest.api.ErrorObj;
 import dk.localghost.hold17.rest.auth.AuthenticationEndpoint;
 import dk.localghost.hold17.transport.IHangman;
 
@@ -35,14 +36,18 @@ public class HangmanRest {
 
         IHangman hangman = HangmanHelper.getHangmanService(token, false);
         try {
-            hangman.reset(token);
+            hangman.startNewGame(token);
         } catch(AuthenticationException ex) {
-
+            ErrorObj error = new ErrorObj("Authentication error: " + ex.getMessage());
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(gson.toJson(error))
+                    .build();
         }
-        HangmanGame game = new HangmanGame();
-        game.setGame(hangman);
+        HangmanGame currentGame = new HangmanGame();
+        currentGame.setGame(hangman);
         return Response
-                .ok("New game created by user ")
+                .status(Response.Status.CREATED).entity(gson.toJson(currentGame))
                 .build();
     }
 
@@ -60,15 +65,18 @@ public class HangmanRest {
 
         IHangman hangman = HangmanHelper.getHangmanService(token, true);
         if(hangman == null) {
-            String errMsg = "A game has not yet been created.";
-            return Response.status(400).entity(errMsg).build();
+            ErrorObj error = new ErrorObj("A game has not yet been created.");
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(gson.toJson(error))
+                    .build();
         }
-        HangmanGame game = new HangmanGame();
-        game.setGame(hangman);
+        HangmanGame currentGame = new HangmanGame();
+        currentGame.setGame(hangman);
 
         return Response
-                .status(Response.Status.CREATED)
-                .entity(gson.toJson(game))
+                .status(Response.Status.ACCEPTED)
+                .entity(gson.toJson(currentGame))
                 .build();
     }
 
@@ -89,15 +97,19 @@ public class HangmanRest {
         try {
             hangman.guess(letter, token);
         } catch(AuthenticationException ex) {
-
+            ErrorObj error = new ErrorObj("Authentication error: " + ex.getMessage());
+            return Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(gson.toJson(error))
+                    .build();
         }
 
-        HangmanGame game = new HangmanGame();
-        game.setGame(hangman);
+        HangmanGame currentGame = new HangmanGame();
+        currentGame.setGame(hangman);
 
         return Response
                 .status(Response.Status.CREATED)
-                .entity(gson.toJson(game))
+                .entity(gson.toJson(currentGame))
                 .build();
     }
 }
