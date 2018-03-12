@@ -25,16 +25,6 @@ public class Authentication implements IAuthentication {
 
         try {
             validUser = Auth.signIn(user.getUsername(), user.getPassword());
-
-            HangmanLogic hangman = new HangmanLogic();
-            if (hangmanServices.get(user.getUsername()) == null) {
-                Endpoint endpoint = Endpoint.publish(getHangmanService(validUser), hangman);
-                System.out.println(user.getUsername() + " created a new game. Word is: " + hangman.getWord());
-                hangmanServices.put(user.getUsername(), endpoint);
-            } else {
-                System.out.println(user.getUsername() + " rejoined a game.");
-            }
-
         } catch (AuthenticationException e) {
             throw new AuthenticationException(e.getMessage(), e.getCause());
         }
@@ -43,18 +33,38 @@ public class Authentication implements IAuthentication {
     }
 
     @Override
-    public Boolean validateToken(String token) {
+    public void createHangmanService(Token token) {
+        String userName = token.getUser().getUsername();
+
+        if (hangmanServices.get(userName) == null) {
+            HangmanLogic hangman = new HangmanLogic();
+            Endpoint endpoint = Endpoint.publish(getHangmanServiceURL(token), hangman);
+
+            System.out.println(userName + " created a new game.");
+            hangmanServices.put(userName, endpoint);
+        } else {
+            System.out.println(userName + " rejoined a game.");
+        }
+    }
+
+    @Override
+    public boolean isGameCreated(Token token) {
+        return hangmanServices.containsKey(token.getUser().getUsername());
+    }
+
+    @Override
+    public boolean validateToken(Token token) {
         return TokenHelper.isTokenValid(token);
     }
 
     @Override
-    public User getUserFromToken(String token) {
+    public User getUserFromToken(Token token) {
         return TokenHelper.getUserFromToken(token);
     }
 
     @Override
-    public String getHangmanService(User user) {
-        return "http://" + Server.ADDRESS + ":" + Server.PORT + "/" + Server.ADDRESS_HANGMAN + "/" + user.getUsername();
+    public String getHangmanServiceURL(Token token) {
+        return "http://" + Server.ADDRESS + ":" + Server.PORT + "/" + Server.ADDRESS_HANGMAN + "/" + token.getUser().getUsername();
     }
 
     @Override
@@ -63,13 +73,13 @@ public class Authentication implements IAuthentication {
     }
 
     @Override
-    public void endGame(User user) throws AuthenticationException {
-        user = Auth.signIn(user.getUsername(), user.getPassword());
+    public void endGame(Token token) {
+        if (!TokenHelper.isTokenValid(token)) return;
 
-        if (hangmanServices.get(user.getUsername()) == null) return;
+        String userName = token.getUser().getUsername();
 
-        System.out.println(user.getUsername() + " just ended his game.");
-        hangmanServices.get(user.getUsername()).stop();
-        hangmanServices.remove(user.getUsername());
+        System.out.println(userName + " just ended his game.");
+        hangmanServices.get(userName).stop();
+        hangmanServices.remove(userName);
     }
 }

@@ -10,14 +10,14 @@ import java.security.Key;
 import java.util.Date;
 
 public class TokenHelper {
-    public final static Key AUTH_KEY = MacProvider.generateKey(SignatureAlgorithm.HS512);
-    public final static String AUTH_TOKEN_TYPE = "Bearer";
-    public final static String AUTH_ISSUER = "hold17.localghost.dk";
-    public final static String AUTH_CLAIM_USER = "user";
+    private final static Key AUTH_KEY = MacProvider.generateKey(SignatureAlgorithm.HS512);
+    private final static String AUTH_TOKEN_TYPE = "Bearer";
+    private final static String AUTH_ISSUER = "hold17.localghost.dk";
+    private final static String AUTH_CLAIM_USER = "user";
 
     public static Token issueToken(User user) {
         final Date today = new Date();
-        final Date expiration = new Date(today.getTime() + (1000 * 60 * 60 * 1)); // One hour expiration
+        final Date expiration = new Date(today.getTime() + (1000 * 60 * 60)); // One hour expiration
 
         user.setPassword(null);
 
@@ -38,16 +38,16 @@ public class TokenHelper {
         return token;
     }
 
-    public static User getUserFromToken(String accessToken) {
-        final Claims claims = Jwts.parser().setSigningKey(AUTH_KEY).parseClaimsJws(accessToken).getBody();
+    public static User getUserFromToken(Token token) {
+        final Claims claims = Jwts.parser().setSigningKey(AUTH_KEY).parseClaimsJws(token.getAccess_token()).getBody();
         final ObjectMapper objm = new ObjectMapper();
 
         return objm.convertValue(claims.get(AUTH_CLAIM_USER), User.class);
     }
 
-    public static boolean isTokenValid(String token) {
+    public static boolean isTokenValid(Token token) {
         try {
-            Jwts.parser().setSigningKey(AUTH_KEY).parseClaimsJws(token).getBody();
+            Jwts.parser().setSigningKey(AUTH_KEY).parseClaimsJws(token.getAccess_token()).getBody();
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
             return false;
         }
