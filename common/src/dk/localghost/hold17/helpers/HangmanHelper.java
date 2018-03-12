@@ -22,7 +22,7 @@ public class HangmanHelper {
 
             hangUrl = new URL( auth.getHangmanServiceURL(token) + "?wsdl");
         } catch(MalformedURLException ex) {
-
+            System.err.println("URL 'hangUrl' in HangmanHelper is malformed. Check auth.getHangManServiceURL(token).");
         }
 
         if(!auth.isGameCreated(token)) {
