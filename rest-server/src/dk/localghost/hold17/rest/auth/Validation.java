@@ -7,6 +7,7 @@ import dk.localghost.hold17.rest.api.ErrorObj;
 import dk.localghost.hold17.rest.config.Routes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -38,4 +39,7 @@ public class Validation {
             return Response.status(Response.Status.UNAUTHORIZED).entity(gson.toJson(err)).build();
         }
     }
+
+    @GET
+    public String test() { return "hej med dig"; }
 }
