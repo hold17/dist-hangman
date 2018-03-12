@@ -3,6 +3,7 @@ package dk.localghost.hold17.client;
 import dk.localghost.authwrapper.dto.User;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.authwrapper.transport.ConnectivityException;
+import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.ui.GallowDrawer;
 import dk.localghost.hold17.transport.IAuthentication;
 import dk.localghost.hold17.transport.IHangman;
@@ -15,7 +16,7 @@ import java.net.URL;
 public class HangmanClient {
     private IAuthentication auth;
     private IHangman hangman;
-    private User user;
+    private Token token;
 
     private String address;
     private int port;
@@ -26,10 +27,11 @@ public class HangmanClient {
 
         auth = connectToAuthenticationService(address, port);
 
-        user = authenticateUser();
-        System.out.println("Welcome, " + user.getFirstname() + " " + user.getLastname());
+        token = authenticateUser();
+        System.out.println("Welcome, " + token.getUser().getFirstname() + " " + token.getUser().getLastname());
 
-        hangman = connectToHangmanService(auth, user);
+        auth.createHangmanService(token);
+        hangman = connectToHangmanService(auth, token);
     }
 
     private static IAuthentication connectToAuthenticationService(String address, int port) throws MalformedURLException {
@@ -43,37 +45,37 @@ public class HangmanClient {
         return ser.getPort(IAuthentication.class);
     }
 
-    private static IHangman connectToHangmanService(IAuthentication auth, User user) throws AuthenticationException, MalformedURLException {
-        final URL hangUrl = new URL( auth.getHangmanService(user) + "?wsdl");
+    private static IHangman connectToHangmanService(IAuthentication auth, Token token) throws MalformedURLException {
+        final URL hangUrl = new URL( auth.getHangmanServiceURL(token) + "?wsdl");
 
         QName hangQname = new QName("http://server.hold17.localghost.dk/", "HangmanLogicService");
-        Service hangSer = Service.create(hangUrl, hangQname);
+        Service hangSvc = Service.create(hangUrl, hangQname);
 
-        return hangSer.getPort(IHangman.class);
+        return hangSvc.getPort(IHangman.class);
     }
 
-    private User authenticateUser() throws AuthenticationException{
+    private Token authenticateUser() throws AuthenticationException{
         String username = null, password = null;
-        User user;
+        Token token;
 
         for (int retries = 3; retries > 0; retries--) {
             username = UserInteraction.getString("Username");
             password = UserInteraction.getString("Password");
 
-            User userCreds = new User();
-            userCreds.setUsername(username);
-            userCreds.setPassword(password);
+            User user = new User();
+            user.setUsername(username);
+            user.setPassword(password);
 
             try {
                 System.out.println("Authenticating...");
-                user = auth.getUserFromToken(auth.authorize(userCreds).getAccess_token());
+                token = auth.authorize(user);
             } catch (AuthenticationException e) {
                 System.out.println("Wrong username or password.");
                 System.out.println(retries - 1 + " retries left.\n");
                 continue;
             }
 
-            return user;
+            return token;
         }
 
         System.out.println("Sending e-mail...");
@@ -89,50 +91,44 @@ public class HangmanClient {
         throw new AuthenticationException("Failed to authorize");
     }
 
-    public void startGame() {
+    public void startGame() throws AuthenticationException {
         if (hangman == null) throw new NullPointerException("Connection to server was unsuccessful, hangman object is still null.");
             while(!hangman.isGameOver()) {
-                System.out.println("Game has started. The word has " + hangman.getVisibleWord().length() + " letters.");
-                System.out.println();
+                System.out.println("Game has started. The word has " + hangman.getVisibleWord().length() + " letters.\n");
                 displayStatus();
 
                 String letterToGuess = UserInteraction.getLetter();
 
-                if (letterToGuess.equals("$")) {
+                // Cheat
+                if (letterToGuess.equals("isuckathangman")) {
                     System.out.println("word: " + hangman.getWord());
                     continue;
                 }
 
                 try {
-                    hangman.guess(letterToGuess, user);
+                    hangman.guess(letterToGuess, token);
+
                 } catch (AuthenticationException e) {
                     System.err.println(e.getMessage());
+                    token = authenticateUser();
                 }
             }
 
-            System.out.println("Game was " + (hangman.isGameWon() ? "won" : "lost") + ".");
-            System.out.println();
-            System.out.println();
-
-            try {
-                hangman.reset(user);
-                auth.endGame(user);
-            } catch (AuthenticationException e) {
-                System.err.println(e.getMessage());
-            }
+            System.out.println("Game was " + (hangman.isGameWon() ? "won" : "lost") + ". \n\n");
+            hangman.reset(token);
 
             if (!UserInteraction.getString("Press 'enter' to start a new game or 'q' and 'enter' to exit").toLowerCase().equals("q")) {
                 try {
-                    auth.authorize(user);
-                    hangman = connectToHangmanService(auth, user);
-                } catch (AuthenticationException|MalformedURLException e) {}
+                    hangman = connectToHangmanService(auth, token);
+                } catch (MalformedURLException e) {}
                 startGame();
+            } else {
+                auth.endGame(token);
             }
     }
 
     private void displayStatus() {
-            System.out.println("Word to guess: " + hangman.getVisibleWord());
-            System.out.println();
+            System.out.println("Word to guess: " + hangman.getVisibleWord() + "\n");
             GallowDrawer.drawGallow(hangman.getWrongLettersCount());
             System.out.println("Guessed letters: " + hangman.getUsedLettersStr());
     }

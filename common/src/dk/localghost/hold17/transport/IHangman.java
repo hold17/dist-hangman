@@ -1,10 +1,9 @@
 package dk.localghost.hold17.transport;
 
-import dk.localghost.authwrapper.dto.User;
-//import authwrapper.transport.SomethingWentWrongException;
-
 import javax.jws.WebService;
 import dk.localghost.authwrapper.transport.AuthenticationException;
+import dk.localghost.hold17.dto.Token;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -20,24 +19,10 @@ public interface IHangman {
     boolean isGameWon();
     boolean isGameLost();
     boolean isGameOver();
-//    private void addDemoData();
-    void reset(User user) throws AuthenticationException;
-//    private void updateVisibleWord();
-    void guess(String givenLetter, User user) throws AuthenticationException;
+    void reset(Token token) throws AuthenticationException;
+    void guess(String givenLetter, Token token) throws AuthenticationException;
     void logStatus();
-
-//    public static String getUrl(String url) throws IOException {
-//        BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
-//        StringBuilder sb = new StringBuilder();
-//        String line = br.readLine();
-//        while (line != null) {
-//            sb.append(line + "\n");
-//            line = br.readLine();
-//        }
-//        return sb.toString();
-//    }
-
-    void getWordsFromWeb(String url, User user) throws IOException, AuthenticationException;
+    void getWordsFromWeb(String url, Token token) throws IOException, AuthenticationException;
     double calculateScore();
     String uniqueLettersOfWord();
 }

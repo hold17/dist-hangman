@@ -1,10 +1,8 @@
 package dk.localghost.hold17.server;
 
-import dk.localghost.authwrapper.dto.User;
-import dk.localghost.authwrapper.dto.Speed;
 import dk.localghost.authwrapper.transport.AuthenticationException;
-import dk.localghost.authwrapper.helper.UserAdministrationFactory;
-import dk.localghost.authwrapper.transport.ConnectivityException;
+import dk.localghost.hold17.dto.Token;
+import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.transport.IHangman;
 
 import javax.jws.WebService;
@@ -89,10 +87,10 @@ public class HangmanLogic implements IHangman {
         possibleWords.add("bird");
     }
 
-    public void reset(User user) throws AuthenticationException {
-        try { authenticateUser(user); } catch (ConnectivityException e) { return; }
+    public void reset(Token token) throws AuthenticationException {
+        authenticateUserToken(token);
         reset();
-        System.out.println(user.getUsername() + " started a new game. The new word is " + this.word);
+        System.out.println(token.getUser().getUsername() + " started a new game. The new word is " + this.word);
     }
 
     private void reset() {
@@ -122,8 +120,8 @@ public class HangmanLogic implements IHangman {
         visibleWord = sb.toString();
     }
 
-    public void guess(String givenLetter, User user) throws AuthenticationException {
-        try { authenticateUser(user); } catch (ConnectivityException e) { return; }
+    public void guess(String givenLetter, Token token) throws AuthenticationException {
+        authenticateUserToken(token);
 
         final String letter = givenLetter.toLowerCase();
 
@@ -140,12 +138,14 @@ public class HangmanLogic implements IHangman {
             lastGuessedLetterIsCorrect = true;
             if (word.length() == correctlyGuessedLettersCount) {
                 gameHasBeenWon = true;
+                timeStop = System.currentTimeMillis();
             }
         } else {
             lastGuessedLetterIsCorrect = false;
             wrongLettersCount++;
             if (wrongLettersCount > 6) {
                 gameHasBeenLost = true;
+                timeStop = System.currentTimeMillis();
             }
         }
     }
@@ -173,7 +173,7 @@ public class HangmanLogic implements IHangman {
         return sb.toString();
     }
 
-    public void getWordsFromWeb(String url, User user) throws IOException, AuthenticationException {
+    public void getWordsFromWeb(String url, Token token) throws IOException, AuthenticationException {
         String data = getUrl(url);
 
         data = data.substring(data.indexOf("<body")). // remove headers
@@ -196,7 +196,7 @@ public class HangmanLogic implements IHangman {
         possibleWords.addAll(new HashSet<String>(Arrays.asList(data.split(" "))));
 
         System.out.println("possibleWords = " + possibleWords);
-        reset(user);
+        reset(token);
     }
 
     public double calculateScore() {
@@ -244,15 +244,11 @@ public class HangmanLogic implements IHangman {
             else
                 uniqueLetters = new StringBuilder(uniqueLetters.toString().replace(String.valueOf(current), ""));
         }
-
         return uniqueLetters.toString();
     }
 
-    private static void authenticateUser(User user) throws AuthenticationException, ConnectivityException {
-        try {
-            UserAdministrationFactory.getUserAdministration(Speed.SLOW).authenticateUser(user.getUsername(), user.getPassword());
-        } catch (ConnectivityException e) {
-            throw new ConnectivityException("Failed to contact server. " + e.getMessage(), e.getCause());
-        }
+    private static void authenticateUserToken(Token token) throws AuthenticationException{
+        if (!TokenHelper.isTokenValid(token))
+            throw new AuthenticationException("Failed to authenticate user token.");
     }
 }

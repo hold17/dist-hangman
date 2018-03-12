@@ -37,6 +37,11 @@ public class Client {
 
         if (hangman == null) return;
 
-        hangman.startGame();
+        try {
+            hangman.startGame();
+        } catch (AuthenticationException e) {
+            System.err.println(e.getMessage() + " Please log in again.");
+        }
+
     }
 }
