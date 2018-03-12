@@ -3,6 +3,12 @@
     <output-path>$PROJECT_DIR$/out/artifacts/rest_server_archive</output-path>
     <root id="archive" name="rest-server archive.war">
       <element id="artifact" artifact-name="rest-server exploded" />
+      <element id="javaee-facet-resources" facet="rest-server/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="rest-server" />
+        </element>
+      </element>
     </root>
   </artifact>
 </component>

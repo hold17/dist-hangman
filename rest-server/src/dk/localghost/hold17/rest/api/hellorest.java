@@ -67,9 +67,9 @@ public class hellorest {
         token.setAccess_token(accessToken);
 
         try {
-            final User user = AuthorizationHelper.getAuthService().getUserFromToken(token);
+            token = AuthorizationHelper.getAuthService().extractToken(token);
 
-            return Response.ok("Hello " + user.getFirstname() + ". This is a secured resource.").build();
+            return Response.ok("Hello " + token.getUser().getFirstname() + ". This is a secured resource.").build();
         } catch (NullPointerException e) {
             e.printStackTrace();
             /*ErrorObj err = new ErrorObj("internal_error", e.getMessage());*/

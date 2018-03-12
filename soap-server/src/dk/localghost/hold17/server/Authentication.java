@@ -58,8 +58,8 @@ public class Authentication implements IAuthentication {
     }
 
     @Override
-    public User getUserFromToken(Token token) {
-        return TokenHelper.getUserFromToken(token);
+    public Token extractToken(Token token) {
+        return TokenHelper.extractToken(token);
     }
 
     @Override
