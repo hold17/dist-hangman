@@ -13,7 +13,7 @@ public class AuthorizationHelper {
     final static String SERVICE = "auth";
     final static String URL_STR = "http://" + ADDRESS + ":" + PORT + "/" + SERVICE + "?wsdl";
 
-    public static IAuthentication getAuthService() throws MalformedURLException {
+    public static IAuthentication getAuthService() {
         final URL url;
 
         try {
@@ -23,7 +23,8 @@ public class AuthorizationHelper {
             Service service = Service.create(url, qname);
             return service.getPort(IAuthentication.class);
         } catch (MalformedURLException e) {
-            throw new MalformedURLException("The url specified is invalid: " + URL_STR);
+            System.err.println("The url specified is invalid: " + URL_STR);
+            return null;
         }
     }
 }

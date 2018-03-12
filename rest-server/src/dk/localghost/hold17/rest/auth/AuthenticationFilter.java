@@ -1,5 +1,6 @@
 package dk.localghost.hold17.rest.auth;
 
+import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.AuthorizationHelper;
 
 import javax.annotation.Priority;
@@ -12,8 +13,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-import java.io.IOException;
-import java.net.MalformedURLException;
 
 @AuthenticationEndpoint.Auth
 @Provider
@@ -23,7 +22,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     private ResourceInfo resourceInfo;
 
     @Override
-    public void filter(ContainerRequestContext containerRequestContext) throws IOException {
+    public void filter(ContainerRequestContext containerRequestContext) {
         // Get http header from the request
         final String authorizationHeader = containerRequestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 
@@ -32,18 +31,25 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             throw new NotAuthorizedException("Authorization header must be provided");
         }
 
-        final String token = authorizationHeader.substring("Bearer ".length()).trim();
+        final String accessToken = authorizationHeader.substring("Bearer ".length()).trim();
 
+        Token token = new Token();
+        token.setAccess_token(accessToken);
+
+        // See if the token is valid
+        // Because returning null is somehow better than just throwing an exception
+        // we have to check for a NPE
         try {
-            // See if the token is valid
-            if (!AuthorizationHelper.getAuthService().validateToken(token))
+            if (!AuthorizationHelper.getAuthService().validateToken(token)) {
                 containerRequestContext.abortWith(
-                    Response.status(Response.Status.UNAUTHORIZED).build()
+                        Response.status(Response.Status.UNAUTHORIZED).build()
                 );
-        } catch (MalformedURLException e) {
+            }
+        } catch (NullPointerException e) {
             containerRequestContext.abortWith(
-                    Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build()
+                    Response.status(Response.Status.INTERNAL_SERVER_ERROR).build()
             );
+            e.printStackTrace();
         }
     }
 }

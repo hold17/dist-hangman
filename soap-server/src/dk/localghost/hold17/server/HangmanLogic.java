@@ -1,10 +1,8 @@
 package dk.localghost.hold17.server;
 
-import dk.localghost.authwrapper.dto.User;
-import dk.localghost.authwrapper.dto.Speed;
 import dk.localghost.authwrapper.transport.AuthenticationException;
-import dk.localghost.authwrapper.helper.UserAdministrationFactory;
-import dk.localghost.authwrapper.transport.ConnectivityException;
+import dk.localghost.hold17.dto.Token;
+import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.transport.IHangman;
 
 import javax.jws.WebService;
@@ -24,42 +22,11 @@ public class HangmanLogic implements IHangman {
     private ArrayList<String> usedLetters = new ArrayList<>();
     private String visibleWord;
     private int wrongLettersCount;
+    private int correctlyGuessedLettersCount;
     private boolean lastGuessedLetterIsCorrect;
     private boolean gameHasBeenWon;
     private boolean gameHasBeenLost;
-
-    public  String getWord() {
-        return this.word;
-    }
-    public String getVisibleWord() {
-        return this.visibleWord;
-    }
-    public ArrayList<String> getPossibleWords() {
-        return this.possibleWords;
-    }
-    public ArrayList<String> getUsedLetters() {
-        return this.usedLetters;
-    }
-    public String getUsedLettersStr() {
-        StringBuilder usedLetters = new StringBuilder();
-        for (String l : this.usedLetters) {
-            usedLetters.append(l);
-        }
-        return usedLetters.toString();
-    }
-    public int getWrongLettersCount() {
-        return this.wrongLettersCount;
-    }
-    public boolean isLastLetterCorrect() {
-        return this.lastGuessedLetterIsCorrect;
-    }
-    public boolean isGameWon() {
-        return this.gameHasBeenWon;
-    }
-    public boolean isGameLost() {
-        return this.gameHasBeenLost;
-    }
-    public boolean isGameOver() { return this.gameHasBeenLost || this.gameHasBeenWon; }
+    private long timeStart, timeStop;
 
     public HangmanLogic() {
         addDemoData();
@@ -76,6 +43,37 @@ public class HangmanLogic implements IHangman {
         this.gameHasBeenLost = hangman.isGameLost();
     }
 
+    // getters
+    public  String getWord() {
+        return this.word;
+    }
+    public String getVisibleWord() {
+        return this.visibleWord;
+    }
+    public ArrayList<String> getPossibleWords() {
+        return this.possibleWords;
+    }
+    public ArrayList<String> getUsedLetters() {
+        return this.usedLetters;
+    }
+    public int getWrongLettersCount() {
+        return this.wrongLettersCount;
+    }
+
+    // gamestate checks
+    public boolean isLastLetterCorrect() {
+        return this.lastGuessedLetterIsCorrect;
+    }
+    public boolean isGameWon() {
+        return this.gameHasBeenWon;
+    }
+    public boolean isGameLost() {
+        return this.gameHasBeenLost;
+    }
+    public boolean isGameOver() {
+        return this.gameHasBeenLost || this.gameHasBeenWon;
+    }
+
     private void addDemoData() {
         possibleWords.clear();
 
@@ -89,76 +87,82 @@ public class HangmanLogic implements IHangman {
         possibleWords.add("bird");
     }
 
-    public void reset(User user) throws AuthenticationException {
-        try { authenticateUser(user); } catch (ConnectivityException e) { return; }
+    public void reset(Token token) throws AuthenticationException {
+        authenticateUserToken(token);
         reset();
-        System.out.println(user.getUsername() + " started a new game. The new word is " + this.word);
+        System.out.println(token.getUser().getUsername() + " started a new game. The new word is " + this.word);
     }
 
     private void reset() {
         usedLetters.clear();
         wrongLettersCount = 0;
+        correctlyGuessedLettersCount = 0;
         gameHasBeenWon = false;
         gameHasBeenLost = false;
         word = possibleWords.get(new Random().nextInt(possibleWords.size()));
         updateVisibleWord();
+        timeStart = System.currentTimeMillis();
     }
 
     private void updateVisibleWord() {
-        visibleWord = "";
-        gameHasBeenWon = true;
+        StringBuilder sb = new StringBuilder();
+        String letter;
+        correctlyGuessedLettersCount = 0;
         for (int n = 0; n < word.length(); n++) {
-            String letter = word.substring(n, n + 1);
+            letter = word.substring(n, n + 1);
             if (usedLetters.contains(letter)) {
-                visibleWord += letter;
+                sb.append(letter);
+                correctlyGuessedLettersCount++;
             } else {
-                visibleWord += "*";
-                gameHasBeenWon = false;
+                sb.append("*");
             }
         }
+        visibleWord = sb.toString();
     }
 
-    public void guess(String givenLetter, User user) throws AuthenticationException {
-        try { authenticateUser(user); } catch (ConnectivityException e) { return; }
+    public void guess(String givenLetter, Token token) throws AuthenticationException {
+        authenticateUserToken(token);
 
         final String letter = givenLetter.toLowerCase();
-//        System.out.println("Guess: " + letter);
 
+        // guard against all kinds of badness
         if (letter.length() != 1) return;
-//        System.out.println("User guess: " + letter);
-        if(usedLetters.contains(letter)) return;
-        if (gameHasBeenWon || gameHasBeenLost) return;
+        else if (usedLetters.contains(letter)) return;
+        else if (gameHasBeenWon || gameHasBeenLost) return;
 
         usedLetters.add(letter);
 
+        updateVisibleWord();
+
         if (word.contains(letter)) {
             lastGuessedLetterIsCorrect = true;
-//            System.out.println("Letter was correct: " + letter);
+            if (word.length() == correctlyGuessedLettersCount) {
+                gameHasBeenWon = true;
+                timeStop = System.currentTimeMillis();
+            }
         } else {
-            // Vi gættede på et bogstav der ikke var i ordet.
             lastGuessedLetterIsCorrect = false;
-//            System.out.println("Letter was NOT correct:" + letter);
-            wrongLettersCount = wrongLettersCount + 1;
+            wrongLettersCount++;
             if (wrongLettersCount > 6) {
                 gameHasBeenLost = true;
+                timeStop = System.currentTimeMillis();
             }
         }
-        updateVisibleWord();
     }
 
     public void logStatus() {
-        System.out.println("---------- ");
+        System.out.println("----------");
         System.out.println("- word (hidden) = " + word);
         System.out.println("- visibleWord = " + visibleWord);
         System.out.println("- wrongLettersCount = " + wrongLettersCount);
         System.out.println("- usedLetters = " + usedLetters);
         if (gameHasBeenLost) System.out.println("- GAME LOST");
-        if (gameHasBeenWon) {System.out.println("- GAME WON"); System.out.println(" - Score = " + this.calculateScore()); }
+        if (gameHasBeenWon) {System.out.println("- GAME WON"); System.out.println(" - Score = " + this.calculateScore() + " || " + this.calcScore()); }
 
-        System.out.println("---------- ");
+        System.out.println("----------");
     }
 
-    public static String getUrl(String url) throws IOException {
+    private static String getUrl(String url) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
         StringBuilder sb = new StringBuilder();
         String line = br.readLine();
@@ -169,20 +173,20 @@ public class HangmanLogic implements IHangman {
         return sb.toString();
     }
 
-    public void getWordsFromWeb(String url, User user) throws IOException, AuthenticationException {
+    public void getWordsFromWeb(String url, Token token) throws IOException, AuthenticationException {
         String data = getUrl(url);
 
-        data = data.substring(data.indexOf("<body")). // fjern headere
-                replaceAll("<.+?>", " ").toLowerCase(). // fjern tags
-                replaceAll("&#198;", "æ"). // erstat HTML-tegn
-                replaceAll("&#230;", "æ"). // erstat HTML-tegn
-                replaceAll("&#216;", "ø"). // erstat HTML-tegn
-                replaceAll("&#248;", "ø"). // erstat HTML-tegn
-                replaceAll("&oslash;", "ø"). // erstat HTML-tegn
-                replaceAll("&#229;", "å"). // erstat HTML-tegn
-                replaceAll("[^a-zæøå]", " "). // fjern tegn der ikke er bogstaver
-                replaceAll(" [a-zæøå] "," "). // fjern 1-bogstavsord
-                replaceAll(" [a-zæøå][a-zæøå] "," "); // fjern 2-bogstavsord
+        data = data.substring(data.indexOf("<body")). // remove headers
+                replaceAll("<.+?>", " ").toLowerCase(). // remove tags
+                replaceAll("&#198;", "æ"). // replace HTML-symbols
+                replaceAll("&#230;", "æ"). // replace HTML-symbols
+                replaceAll("&#216;", "ø"). // replace HTML-symbols
+                replaceAll("&#248;", "ø"). // replace HTML-symbols
+                replaceAll("&oslash;", "ø"). // replace HTML-symbols
+                replaceAll("&#229;", "å"). // replace HTML-symbols
+                replaceAll("[^a-zæøå]", " "). // remove symbols that aren't letters
+                replaceAll("[a-zæøå]"," "). // remove 1-letter words
+                replaceAll("[a-zæøå][a-zæøå]"," "); // remove 2-letter words
 
         data = data.trim();
 
@@ -191,8 +195,8 @@ public class HangmanLogic implements IHangman {
         possibleWords.clear();
         possibleWords.addAll(new HashSet<String>(Arrays.asList(data.split(" "))));
 
-        System.out.println("muligeOrd = " + possibleWords);
-        reset(user);
+        System.out.println("possibleWords = " + possibleWords);
+        reset(token);
     }
 
     public double calculateScore() {
@@ -207,6 +211,29 @@ public class HangmanLogic implements IHangman {
         return score;
     }
 
+    private int calcScore() {
+        long timeInMillis = timeStop - timeStart;
+
+        final int lengthOfWord = this.word.length();
+        final int uniqueLetterCount = this.uniqueLettersOfWord().length();
+        final int wrongGuessCount = this.wrongLettersCount;
+
+        System.out.println("time: " + Math.round(timeInMillis/1000));
+        // I'm tired so this score calc sucks...
+        int score = (int) Math.round(Math.round(timeInMillis/100) * Math.pow(0.9, (lengthOfWord - wrongGuessCount) + uniqueLetterCount));
+        System.out.println("score: " + score);
+
+        return score;
+    }
+
+    public String getUsedLettersStr() {
+        StringBuilder sb = new StringBuilder();
+        for (String l : this.usedLetters) {
+            sb.append(l);
+        }
+        return sb.toString();
+    }
+
     public String uniqueLettersOfWord() {
         StringBuilder uniqueLetters = new StringBuilder();
 
@@ -217,15 +244,11 @@ public class HangmanLogic implements IHangman {
             else
                 uniqueLetters = new StringBuilder(uniqueLetters.toString().replace(String.valueOf(current), ""));
         }
-
         return uniqueLetters.toString();
     }
 
-    private static void authenticateUser(User user) throws AuthenticationException, ConnectivityException {
-        try {
-            UserAdministrationFactory.getUserAdministration(Speed.SLOW).authenticateUser(user.getUsername(), user.getPassword());
-        } catch (ConnectivityException e) {
-            throw new ConnectivityException("Failed to contact server. " + e.getMessage(), e.getCause());
-        }
+    private static void authenticateUserToken(Token token) throws AuthenticationException{
+        if (!TokenHelper.isTokenValid(token))
+            throw new AuthenticationException("Failed to authenticate user token.");
     }
 }

@@ -16,7 +16,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.net.MalformedURLException;
 
 @Path(Routes.OAUTH_AUTHORIZE)
 public class AuthenticationEndpoint {
@@ -30,13 +29,13 @@ public class AuthenticationEndpoint {
             Token token = AuthorizationHelper.getAuthService().authorize(new User(username, password));
 
             return Response.ok().entity(gson.toJson(token)).build();
-        } catch (MalformedURLException e) {
-            ErrorObj err = new ErrorObj();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+/*            ErrorObj err = new ErrorObj();
 
             err.setError_type("malformed_url");
-            err.setError_message(e.getMessage());
-
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+            err.setError_message(e.getMessage());*/
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)/*.entity(gson.toJson(err))*/.build();
         } catch (AuthenticationException e) {
             ErrorObj err = new ErrorObj();
 

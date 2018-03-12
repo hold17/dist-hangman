@@ -8,14 +8,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import com.google.gson.Gson;
 
-import java.net.MalformedURLException;
-
 import dk.localghost.authwrapper.dto.Speed;
 import dk.localghost.authwrapper.dto.User;
 import dk.localghost.authwrapper.helper.UserAdministrationFactory;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.authwrapper.transport.ConnectivityException;
 import dk.localghost.authwrapper.transport.IUserAdministration;
+import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.AuthorizationHelper;
 import dk.localghost.hold17.rest.auth.AuthenticationEndpoint;
 
@@ -63,15 +62,18 @@ public class hellorest {
     @Produces(MediaType.TEXT_PLAIN)
     public Response secureResource(@Context HttpServletRequest servletRequest) {
         final String header = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
-        final String token = header.substring("Bearer ".length()).trim();
+        final String accessToken = header.substring("Bearer ".length()).trim();
+        Token token = new Token();
+        token.setAccess_token(accessToken);
 
         try {
             final User user = AuthorizationHelper.getAuthService().getUserFromToken(token);
 
             return Response.ok("Hello " + user.getFirstname() + ". This is a secured resource.").build();
-        } catch (MalformedURLException e) {
-            ErrorObj err = new ErrorObj("internal_error", e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            /*ErrorObj err = new ErrorObj("internal_error", e.getMessage());*/
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)/*.entity(gson.toJson(err))*/.build();
         }
     }
 }
