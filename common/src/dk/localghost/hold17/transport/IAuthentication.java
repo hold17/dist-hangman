@@ -11,7 +11,7 @@ import javax.jws.WebService;
 public interface IAuthentication {
     Token authorize(User user) throws AuthenticationException;
     boolean validateToken(Token token);
-    User getUserFromToken(Token token);
+    Token extractToken(Token token);
     boolean isGameCreated(Token token);
     void createHangmanService(Token token);
     String getHangmanServiceURL(Token token);
