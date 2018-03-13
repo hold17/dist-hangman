@@ -3,6 +3,7 @@ package dk.localghost.hold17.server;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.TokenHelper;
+import dk.localghost.hold17.server.database.Database;
 import dk.localghost.hold17.server.database.data.HighScore;
 import dk.localghost.hold17.transport.IHangman;
 
@@ -16,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 @WebService(endpointInterface = "dk.localghost.hold17.transport.IHangman")
 public class HangmanLogic implements IHangman {
+    private static Database database = new Database();
     private ArrayList<String> possibleWords = new ArrayList<>();
     private String word;
     private ArrayList<String> usedLetters = new ArrayList<>();
@@ -202,16 +204,28 @@ public class HangmanLogic implements IHangman {
             timeStop = System.currentTimeMillis();
             updateCurrentTime();
             updateCurrentScore();
+            // currently all high scores are saved by default, should eventually be a user choice
+            createHighScore(token, this.currentScore, this.getFormattedTime(), true);
             this.hasGameBegun = false;
         }
     }
 
-    // create simple highscore for single game
-    public HighScore createHighscore(Token token, int score, int time) {
+    // create simple high score for single game
+    public HighScore createHighScore(Token token, int score, String time, boolean saveHighScore) {
         HighScore highScore = new HighScore(
             new Date(), token.getUser().getUsername(), score, time, this.getWord(), this.getWrongLettersStr()
         );
+        if (saveHighScore) putHighScoreInDatabase(highScore);
         return highScore;
+    }
+
+    private void putHighScoreInDatabase(HighScore highScore) {
+        database.insertNewHighScore(highScore);
+    }
+
+    public List<HighScore> getListOfHighScores(/*Token token*/) /*throws AuthenticationException*/ {
+/*        authenticateUserToken(token);*/
+        return database.getListOfHighScores();
     }
 
     public void logStatus() {
@@ -221,15 +235,24 @@ public class HangmanLogic implements IHangman {
         System.out.println("- wrongLettersCount = " + wrongLettersCount);
         System.out.println("- usedLetters = " + usedLetters);
         System.out.println("- uniqueLettersOfWord = " + getUniqueLettersOfWord());
-        if (gameHasBeenLost) {
-            System.out.println("- GAME LOST");
+
+        if (isGameOver()) {
+            if (gameHasBeenLost) System.out.println("- GAME LOST");
+            else if (gameHasBeenWon) System.out.println("- GAME WON");
             System.out.println(" - Score = " + this.currentScore);
             System.out.println(" - Time = " + this.currentTime);
         }
-        else if (gameHasBeenWon) {
-            System.out.println("- GAME WON");
-            System.out.println(" - Score = " + this.currentScore);
-            System.out.println(" - Time = " + this.currentTime);
+
+        List<HighScore> highScores = getListOfHighScores();
+
+        for (HighScore highScore : highScores) {
+            System.out.println("High score (" +
+                    highScore.getDate() + ") | playerName: " +
+                    highScore.getPlayerName() + " | score: " +
+                    highScore.getScore() + " | time: " +
+                    highScore.getTime() + " | word: " +
+                    highScore.getCorrectWord() + " | wrong letters: " +
+                    highScore.getWrongLetters());
         }
 
         System.out.println("----------");
@@ -278,19 +301,26 @@ public class HangmanLogic implements IHangman {
         final int uniqueLetterCount = this.getUniqueLettersOfWord().length();
         final int wrongGuessCount = this.wrongLettersCount;
 
-        int baseTimeScore = 50; // some magic number we find appropriate
-        int baseLetterScore = 50; // ----||----
+        // some magic numbers we find appropriate
+        int letterScoreRange = 333;
+        int timeScoreRange = 500;
+        int baseLetterScore = 100;
+        int baseTimeScore = 100;
 
-        int bestTime = WordLength*50; // should vary with word length. Maybe do something more exciting
-        int bestLetters = uniqueLetterCount; // this should maybe be another metric also taking into account how difficult the word is
+        double bestLetters = uniqueLetterCount; // this should maybe be another metric also taking into account how difficult the word is
+        double bestTime = WordLength*2000+2000; // should vary with word length. Maybe do something more exciting
 
-        float A = 0.9f; // higher number means bigger penalty for bad performance
-        float B = 0.9f; // ----||----
+//        float A = 0.9f; // higher number means bigger penalty for bad performance
+//        float B = 0.9f; // ----||----
 
+        // These formulas are hard and I gave up getting them to work :(
         // Fucking plot this shit to figure out some numbers that work
         // Find a way around actual time being higher than best time messing shit up
-        int letterScore = (int) Math.round(baseLetterScore * Math.pow(A, (bestLetters - wrongGuessCount)));
-        int timeScore = (int) Math.round(baseTimeScore * Math.pow(B, (bestTime - Math.round(timeInMillis/100))));
+//        int letterScore = (int) Math.round(baseLetterScore * Math.pow(A, (wrongGuessCount - bestLetters)));
+//        int timeScore = (int) Math.round(baseTimeScore * Math.pow(B, (timeInMillis - bestTime)));
+
+        int letterScore = (int) Math.round(baseLetterScore + letterScoreRange * Math.exp(-wrongGuessCount/bestLetters));
+        int timeScore = (int) Math.round(baseTimeScore + timeScoreRange * Math.exp(-timeInMillis/bestTime));
 
         // throw a this into a Math.sqrt() to really fuck over bad players
         int score = letterScore + timeScore;
@@ -314,7 +344,6 @@ public class HangmanLogic implements IHangman {
             if (uniqueLetters.toString().indexOf(current) < 0)
                 uniqueLetters.append(current);
         }
-
         return uniqueLetters.toString();
     }
 
@@ -343,10 +372,5 @@ public class HangmanLogic implements IHangman {
                 String.format(".%03d", millis);
 
         return formatted;
-    }
-
-    public boolean isGameActive(Token token) throws AuthenticationException {
-        authenticateUserToken(token);
-        return this.timeStart > 0;
     }
 }
