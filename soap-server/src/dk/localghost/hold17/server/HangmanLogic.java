@@ -223,7 +223,7 @@ public class HangmanLogic implements IHangman {
         database.insertNewHighScore(highScore);
     }
 
-    public List<HighScore> getListOfHighScores(/*Token token*/) /*throws AuthenticationException*/ {
+    public List<HighScore> getHighScoreList(/*Token token*/) /*throws AuthenticationException*/ {
 /*        authenticateUserToken(token);*/
         return database.getListOfHighScores();
     }
@@ -243,7 +243,7 @@ public class HangmanLogic implements IHangman {
             System.out.println(" - Time = " + this.currentTime);
         }
 
-        List<HighScore> highScores = getListOfHighScores();
+        List<HighScore> highScores = getHighScoreList();
 
         for (HighScore highScore : highScores) {
             System.out.println("High score (" +
