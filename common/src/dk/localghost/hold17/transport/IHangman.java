@@ -2,6 +2,7 @@ package dk.localghost.hold17.transport;
 
 import javax.jws.WebService;
 import dk.localghost.authwrapper.transport.AuthenticationException;
+import dk.localghost.hold17.dto.HighScore;
 import dk.localghost.hold17.dto.Token;
 
 import java.io.IOException;
@@ -31,5 +32,5 @@ public interface IHangman {
     void logStatus();
     void getWordsFromWeb(String url, Token token) throws IOException, AuthenticationException;
     String getFormattedTime();
-    List getHighScoreList(/*Token token*/) /*throws AuthenticationException*/;
+    List<HighScore> getHighScoreList(/*Token token*/) /*throws AuthenticationException*/;
 }

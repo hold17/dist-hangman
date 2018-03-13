@@ -1,12 +1,13 @@
 package dk.localghost.hold17.server.database;
 
+import dk.localghost.hold17.dto.HighScore;
 import dk.localghost.hold17.server.Server;
-import dk.localghost.hold17.server.database.data.HighScore;
+import dk.localghost.hold17.server.database.entities.HighScoreEntity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceUnit;
-import java.util.List;
+import java.util.*;
 
 public class Database {
     @PersistenceUnit(
@@ -27,10 +28,10 @@ public class Database {
         entityManagerFactory.close();
     }
 
-    public void insertNewHighScore(HighScore highScore) {
+    public void insertNewHighScore(HighScoreEntity highScoreEntity) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
-        entityManager.persist(highScore);
+        entityManager.persist(highScoreEntity);
         entityManager.getTransaction().commit();
         entityManager.close();
     }
@@ -38,9 +39,14 @@ public class Database {
     public List<HighScore> getListOfHighScores() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
-        List<HighScore> result = entityManager.createQuery("from HighScore", HighScore.class).getResultList();
+        List<HighScoreEntity> result = entityManager.createQuery("from HighScoreEntity order by score", HighScoreEntity.class).getResultList();
         entityManager.getTransaction().commit();
         entityManager.close();
-        return result;
+
+        List<HighScore> convertedResult = new ArrayList<>();
+        for (HighScoreEntity hs : result) {
+            convertedResult.add(new HighScore(hs.getId(), hs.getDate(), hs.getPlayerName(), hs.getScore(), hs.getTime(), hs.getCorrectWord(), hs.getWrongLetters()));
+        }
+        return convertedResult;
     }
 }

@@ -1,10 +1,11 @@
 package dk.localghost.hold17.server;
 
 import dk.localghost.authwrapper.transport.AuthenticationException;
+import dk.localghost.hold17.dto.HighScore;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.server.database.Database;
-import dk.localghost.hold17.server.database.data.HighScore;
+import dk.localghost.hold17.server.database.entities.HighScoreEntity;
 import dk.localghost.hold17.transport.IHangman;
 
 import javax.jws.WebService;
@@ -211,16 +212,16 @@ public class HangmanLogic implements IHangman {
     }
 
     // create simple high score for single game
-    public HighScore createHighScore(Token token, int score, String time, boolean saveHighScore) {
-        HighScore highScore = new HighScore(
+    public HighScoreEntity createHighScore(Token token, int score, String time, boolean saveHighScore) {
+        HighScoreEntity highScoreEntity = new HighScoreEntity(
             new Date(), token.getUser().getUsername(), score, time, this.getWord(), this.getWrongLettersStr()
         );
-        if (saveHighScore) putHighScoreInDatabase(highScore);
-        return highScore;
+        if (saveHighScore) putHighScoreInDatabase(highScoreEntity);
+        return highScoreEntity;
     }
 
-    private void putHighScoreInDatabase(HighScore highScore) {
-        database.insertNewHighScore(highScore);
+    private void putHighScoreInDatabase(HighScoreEntity highScoreEntity) {
+        database.insertNewHighScore(highScoreEntity);
     }
 
     public List<HighScore> getHighScoreList(/*Token token*/) /*throws AuthenticationException*/ {
@@ -243,17 +244,17 @@ public class HangmanLogic implements IHangman {
             System.out.println(" - Time = " + this.currentTime);
         }
 
-        List<HighScore> highScores = getHighScoreList();
-
-        for (HighScore highScore : highScores) {
-            System.out.println("High score (" +
-                    highScore.getDate() + ") | playerName: " +
-                    highScore.getPlayerName() + " | score: " +
-                    highScore.getScore() + " | time: " +
-                    highScore.getTime() + " | word: " +
-                    highScore.getCorrectWord() + " | wrong letters: " +
-                    highScore.getWrongLetters());
-        }
+//        List<HighScoreEntity> highScoreEntities = getHighScoreList();
+//
+//        for (HighScoreEntity highScoreEntity : highScoreEntities) {
+//            System.out.println("High score (" +
+//                    highScoreEntity.getDate() + ") | playerName: " +
+//                    highScoreEntity.getPlayerName() + " | score: " +
+//                    highScoreEntity.getScore() + " | time: " +
+//                    highScoreEntity.getTime() + " | word: " +
+//                    highScoreEntity.getCorrectWord() + " | wrong letters: " +
+//                    highScoreEntity.getWrongLetters());
+//        }
 
         System.out.println("----------");
     }
@@ -286,8 +287,8 @@ public class HangmanLogic implements IHangman {
 
         data = data.trim();
 
-        System.out.println("data = " + data);
-        System.out.println("data = " + Arrays.asList(data.split("\\s+")));
+        System.out.println("entities = " + data);
+        System.out.println("entities = " + Arrays.asList(data.split("\\s+")));
         possibleWords.clear();
         possibleWords.addAll(new HashSet<String>(Arrays.asList(data.split(" "))));
 
