@@ -4,13 +4,12 @@ import com.google.gson.Gson;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.HangmanGame;
 import dk.localghost.hold17.dto.Token;
+import dk.localghost.hold17.helpers.FatalServerException;
 import dk.localghost.hold17.helpers.HangmanHelper;
-import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.rest.api.ErrorObj;
 import dk.localghost.hold17.rest.auth.AuthenticationEndpoint;
 import dk.localghost.hold17.transport.IHangman;
 
-import javax.lang.model.type.ErrorType;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -22,36 +21,47 @@ import javax.ws.rs.core.Response;
 public class HangmanRest {
     private static final Gson gson = new Gson();
 
-    //Start new game
+    /**
+     * Creates a new Hangman instance. If a game already exist, it will be destroyed first.
+     * @param servletRequest web request
+     * @return A new hangman game
+     */
     @AuthenticationEndpoint.Auth
     @POST
     @Path("game")
     @Produces(MediaType.TEXT_XML)
-    public Response startGame(@Context HttpServletRequest servletRequest) {
+    public Response createNewGame(@Context HttpServletRequest servletRequest) {
         final String header = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         final String tokenStr = header.substring("Bearer ".length()).trim();
 
         Token token = new Token();
         token.setAccess_token(tokenStr);
 
-        IHangman hangman = HangmanHelper.getHangmanService(token, false);
+        final IHangman hangman;
+
         try {
-            hangman.startNewGame(token);
-        } catch(AuthenticationException ex) {
-            ErrorObj error = new ErrorObj("Authentication error: " + ex.getMessage());
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity(gson.toJson(error))
-                    .build();
+            hangman = HangmanHelper.createNewGame(token);
+        } catch (FatalServerException e) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("internal_server_error");
+            err.setError_message(e.getMessage());
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
         }
-        HangmanGame currentGame = new HangmanGame();
-        currentGame.setGame(hangman);
+
+        HangmanGame currentGame = new HangmanGame(hangman);
+
         return Response
-                .status(Response.Status.CREATED).entity(gson.toJson(currentGame))
+                .status(Response.Status.CREATED)
+                .entity(gson.toJson(currentGame))
                 .build();
     }
 
-    //Get game
+    /**
+     * Get an active game for the specified user
+     * @param servletRequest web request
+     * @return current state of the game, or 404 if it does not exist
+     */
     @AuthenticationEndpoint.Auth
     @GET
     @Path("game")
@@ -63,24 +73,83 @@ public class HangmanRest {
         Token token = new Token();
         token.setAccess_token(tokenStr);
 
-        IHangman hangman = HangmanHelper.getHangmanService(token, true);
-        if(hangman == null) {
-            ErrorObj error = new ErrorObj("A game has not yet been created.");
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity(gson.toJson(error))
-                    .build();
+        final IHangman hangman;
+
+        try {
+            hangman = HangmanHelper.getHangmanService(token);
+        } catch (FatalServerException e) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("internal_server_error");
+            err.setError_message(e.getMessage());
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
         }
-        HangmanGame currentGame = new HangmanGame();
-        currentGame.setGame(hangman);
+
+        // 404 if it does not exist
+        if (hangman == null) return Response.status(Response.Status.NOT_FOUND).build();
+
+        HangmanGame currentGame = new HangmanGame(hangman);
 
         return Response
-                .status(Response.Status.ACCEPTED)
+                .status(Response.Status.OK)
                 .entity(gson.toJson(currentGame))
                 .build();
     }
 
-    //Guess letter
+    /**
+     * Start a game if one exists
+     * @param servletRequest web request
+     * @return current state of the game
+     */
+    @AuthenticationEndpoint.Auth
+    @PUT
+    @Path("game")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response startGame(@Context HttpServletRequest servletRequest) {
+        final String header = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        final String tokenStr = header.substring("Bearer ".length()).trim();
+
+        Token token = new Token();
+        token.setAccess_token(tokenStr);
+
+        final IHangman hangman;
+
+        try {
+            hangman = HangmanHelper.getHangmanService(token);
+        } catch(FatalServerException e) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("internal_server_error");
+            err.setError_message(e.getMessage());
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        }
+
+
+        if (hangman == null) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("not_found");
+            err.setError_message("A game was not created for that user.");
+            return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(err)).build();
+        }
+
+        try {
+            hangman.startNewGame(token);
+        } catch (AuthenticationException e) {
+            ErrorObj err = new ErrorObj("authentication_exception", e.getMessage());
+            return Response.status(Response.Status.UNAUTHORIZED).entity(err).build();
+        }
+
+        HangmanGame game = new HangmanGame(hangman);
+
+        return Response.accepted().entity(gson.toJson(game)).build();
+    }
+
+    /**
+     * Guess a letter if a game exist
+     * @param servletRequest
+     * @param letter
+     * @return current state of the game
+     */
     @AuthenticationEndpoint.Auth
     @POST
     @Path("guess/{letter}")
@@ -92,24 +161,60 @@ public class HangmanRest {
         Token token = new Token();
         token.setAccess_token(tokenStr);
 
-        IHangman hangman = HangmanHelper.getHangmanService(token, false);
+        final IHangman hangman;
+
+        try {
+            hangman = HangmanHelper.getHangmanService(token);
+        } catch(FatalServerException e) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("internal_server_error");
+            err.setError_message(e.getMessage());
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        }
+
+        if (hangman == null) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("not_found");
+            err.setError_message("A game was not created for that user.");
+            return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(err)).build();
+        }
 
         try {
             hangman.guess(letter, token);
-        } catch(AuthenticationException ex) {
-            ErrorObj error = new ErrorObj("Authentication error: " + ex.getMessage());
-            return Response
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity(gson.toJson(error))
-                    .build();
+        } catch (AuthenticationException e) {
+            ErrorObj err = new ErrorObj("authentication_exception", e.getMessage());
+            return Response.status(Response.Status.UNAUTHORIZED).entity(err).build();
         }
 
-        HangmanGame currentGame = new HangmanGame();
-        currentGame.setGame(hangman);
+        HangmanGame currentGame = new HangmanGame(hangman);
 
         return Response
-                .status(Response.Status.CREATED)
+                .status(Response.Status.ACCEPTED)
                 .entity(gson.toJson(currentGame))
                 .build();
+    }
+
+    @AuthenticationEndpoint.Auth
+    @DELETE
+    @Path("game")
+    public Response destroyGame(@Context HttpServletRequest servletRequest) {
+        final String header = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        final String tokenStr = header.substring("Bearer ".length()).trim();
+
+        Token token = new Token();
+        token.setAccess_token(tokenStr);
+
+        try {
+            HangmanHelper.destroyHangmanService(token);
+        } catch(FatalServerException e) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("internal_server_error");
+            err.setError_message(e.getMessage());
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        }
+
+        return Response.ok().build();
     }
 }

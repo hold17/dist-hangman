@@ -12,8 +12,12 @@ public class HangmanGame {
     private boolean gameHasBeenWon;
     private boolean gameHasBeenLost;
     private boolean isGameOver;
+    private boolean hasGameBegun;
+    private String time;
+    private int score;
 
     public HangmanGame() { }
+    public HangmanGame(IHangman game) { this.setGame(game); }
 
     public ArrayList<String> getUsedLetters() {
         return usedLetters;
@@ -71,6 +75,30 @@ public class HangmanGame {
         isGameOver = gameOver;
     }
 
+    public boolean isHasGameBegun() {
+        return hasGameBegun;
+    }
+
+    public void setHasGameBegun(boolean hasGameBegun) {
+        this.hasGameBegun = hasGameBegun;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
     public void setGame(IHangman hangman) {
         this.setWrongLettersCount(hangman.getWrongLettersCount());
         this.setLastGuessedLetterIsCorrect(hangman.isLastLetterCorrect());
@@ -79,5 +107,8 @@ public class HangmanGame {
         this.setGameHasBeenLost(hangman.isGameLost());
         this.setGameHasBeenWon(hangman.isGameWon());
         this.setGameOver(hangman.isGameOver());
+        this.setHasGameBegun(hangman.hasGameBegun());
+        this.setScore(hangman.getCurrentScore());
+        this.setTime(hangman.getFormattedTime());
     }
 }

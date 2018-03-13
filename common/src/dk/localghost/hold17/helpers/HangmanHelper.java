@@ -10,28 +10,80 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class HangmanHelper {
-    public static IHangman getHangmanService(Token token, Boolean get) {
-        IAuthentication auth = null;
-        URL hangUrl = null;
+    private final static String namespaceURI = "http://server.hold17.localghost.dk/";
+    private final static String localPart = "HangmanLogicService";
+    /**
+     * Create a new game. Destroy existing if it exists
+     * @param token valid access token
+     * @return A new hangman instance
+     */
+    public static IHangman createNewGame(Token token) throws FatalServerException {
+        final IAuthentication auth = AuthorizationHelper.getAuthService();
+
+        if (auth == null) throw new FatalServerException("IAuthentication is null.");
+
+        token = auth.extractToken(token);
+        URL hangmanUrl = null;
+
+        // If a game already exist, end it
+        if(auth.isGameCreated(token))
+            auth.endGame(token);
+
+        auth.createHangmanService(token);
+
+        // Get the url of the soap wsdl
         try {
-            auth = AuthorizationHelper.getAuthService();
-            token = auth.extractToken(token);
-
-            hangUrl = new URL( auth.getHangmanServiceURL(token) + "?wsdl");
-        } catch(MalformedURLException ex) {
-            System.err.println("URL 'hangUrl' in HangmanHelper is malformed. Check auth.getHangManServiceURL(token).");
+            hangmanUrl = new URL(auth.getHangmanServiceURL(token) + "?wsdl");
+        } catch (MalformedURLException e) {
+            throw new FatalServerException("Some url was malformed: " + e.getMessage());
         }
 
-        if(!auth.isGameCreated(token)) {
-            if(get) { return null; }
-            auth.createHangmanService(token);
+        QName hangmanQname = new QName(namespaceURI, localPart);
+        Service hangmanService = Service.create(hangmanUrl, hangmanQname);
+
+        return hangmanService.getPort(IHangman.class);
+    }
+
+    /**
+     * Will check if a game exists and then return it
+     * @param token valid access token
+     * @return An existing hangman instance or null of no instance exists for the specified user
+     */
+    public static IHangman getHangmanService(Token token) throws FatalServerException {
+        final IAuthentication auth = AuthorizationHelper.getAuthService();
+
+        if (auth == null) throw new FatalServerException("IAuthentication is null.");
+
+        token = auth.extractToken(token);
+        URL hangmanUrl = null;
+
+        // If a game existrs, return null
+        if (auth.isGameCreated(token)) return null;
+
+        // Get the url of the soap wsdl
+        try {
+            hangmanUrl = new URL(auth.getHangmanServiceURL(token) + "?wsdl");
+        } catch (MalformedURLException e) {
+            throw new FatalServerException("Some url was malformed: " + e.getMessage());
         }
 
-        QName hangQname = new QName("http://server.hold17.localghost.dk/", "HangmanLogicService");
-        Service hangSer = Service.create(hangUrl, hangQname);
+        QName hangmanQname = new QName(namespaceURI, localPart);
+        Service hangmanService = Service.create(hangmanUrl, hangmanQname);
 
-        IHangman hangman = hangSer.getPort(IHangman.class);
+        return hangmanService.getPort(IHangman.class);
+    }
 
-        return hangman;
+    /**
+     * Destory a game for a specific player
+     * @param token valid access token
+     * @throws FatalServerException
+     */
+    public static void destroyHangmanService(Token token) throws FatalServerException {
+        final IAuthentication auth = AuthorizationHelper.getAuthService();
+
+        if (auth == null) throw new FatalServerException("IAuthentication is null.");
+
+        token = auth.extractToken(token);
+        auth.endGame(token);
     }
 }
