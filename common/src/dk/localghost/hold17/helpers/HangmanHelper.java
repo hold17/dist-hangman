@@ -58,7 +58,7 @@ public class HangmanHelper {
         URL hangmanUrl = null;
 
         // If a game exists, return null
-        if (auth.isGameCreated(token)) return null;
+        if (!auth.isGameCreated(token)) return null;
 
         // Get the url of the soap wsdl
         try {
@@ -84,6 +84,7 @@ public class HangmanHelper {
         if (auth == null) throw new FatalServerException("IAuthentication is null.");
 
         token = auth.extractToken(token);
-        auth.endGame(token);
+
+        if (auth.isGameCreated(token)) auth.endGame(token);
     }
 }

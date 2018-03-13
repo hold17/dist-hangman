@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.HangmanGame;
 import dk.localghost.hold17.dto.Token;
+import dk.localghost.hold17.helpers.AuthorizationHelper;
 import dk.localghost.hold17.helpers.FatalServerException;
 import dk.localghost.hold17.helpers.HangmanHelper;
 import dk.localghost.hold17.rest.api.ErrorObj;
@@ -29,7 +30,7 @@ public class HangmanRest {
     @AuthenticationEndpoint.Auth
     @POST
     @Path("game")
-    @Produces(MediaType.TEXT_XML)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response createNewGame(@Context HttpServletRequest servletRequest) {
         final String header = servletRequest.getHeader(HttpHeaders.AUTHORIZATION);
         final String tokenStr = header.substring("Bearer ".length()).trim();
@@ -86,7 +87,10 @@ public class HangmanRest {
         }
 
         // 404 if it does not exist
-        if (hangman == null) return Response.status(Response.Status.NOT_FOUND).build();
+        if (hangman == null) {
+            ErrorObj err = new ErrorObj("not_found", "No game exist for this user yet.");
+            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(err)).build();
+        }
 
         HangmanGame currentGame = new HangmanGame(hangman);
 
@@ -111,6 +115,7 @@ public class HangmanRest {
 
         Token token = new Token();
         token.setAccess_token(tokenStr);
+        token = AuthorizationHelper.getAuthService().extractToken(token);
 
         final IHangman hangman;
 
@@ -123,7 +128,6 @@ public class HangmanRest {
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
         }
-
 
         if (hangman == null) {
             ErrorObj err = new ErrorObj();
