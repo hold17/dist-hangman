@@ -1,7 +1,7 @@
 package dk.localghost.hold17.server.database;
 
+import dk.localghost.hold17.server.Server;
 import dk.localghost.hold17.server.database.data.HighScore;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -10,6 +10,7 @@ import java.util.List;
 
 public class Database {
     @PersistenceUnit(
+            // TODO: rename to something production ready
             unitName = "testdatabase"
     )
     private EntityManagerFactory entityManagerFactory;
@@ -18,7 +19,8 @@ public class Database {
     }
 
     protected void createEntityManagerFactory() {
-        entityManagerFactory = Persistence.createEntityManagerFactory( "testdatabase" );
+        // TODO: rename to something production ready
+        entityManagerFactory = Persistence.createEntityManagerFactory("testdatabase", Server.properties);
     }
 
     protected void closeEntityManagerFactory() {
@@ -41,5 +43,4 @@ public class Database {
         entityManager.close();
         return result;
     }
-
 }
