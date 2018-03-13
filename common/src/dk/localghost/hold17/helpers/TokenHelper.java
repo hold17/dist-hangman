@@ -38,11 +38,15 @@ public class TokenHelper {
         return token;
     }
 
-    public static User getUserFromToken(Token token) {
+    public static Token extractToken(Token token) {
         final Claims claims = Jwts.parser().setSigningKey(AUTH_KEY).parseClaimsJws(token.getAccess_token()).getBody();
         final ObjectMapper objm = new ObjectMapper();
 
-        return objm.convertValue(claims.get(AUTH_CLAIM_USER), User.class);
+        token.setToken_type(AUTH_TOKEN_TYPE);
+        token.setExpires_in(claims.getExpiration().getTime());
+        token.setUser(objm.convertValue(claims.get(AUTH_CLAIM_USER), User.class));
+
+        return token;
     }
 
     public static boolean isTokenValid(Token token) {
