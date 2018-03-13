@@ -24,7 +24,7 @@ public class HighScore {
     private int score;
 
     @Basic
-    private int time;
+    private String time;
 
     @Basic
     private String correctWord;
@@ -36,7 +36,7 @@ public class HighScore {
         // this form used by Hibernate
     }
 
-    public HighScore(Date date, String playerName, int score, int time, String correctWord, String wrongLetters) {
+    public HighScore(Date date, String playerName, int score, String time, String correctWord, String wrongLetters) {
         // for application use, to create new events
         this.date = date;
         this.playerName = playerName;
@@ -78,11 +78,11 @@ public class HighScore {
         this.score = score;
     }
 
-    public int getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(int time) {
+    public void setTime(String time) {
         this.time = time;
     }
 
