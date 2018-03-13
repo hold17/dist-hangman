@@ -1,0 +1,5 @@
+javax.persistence.jdbc.url=jdbc:mysql://ADDRESS:PORT/DATABASE
+javax.persistence.jdbc.user=USER
+javax.persistence.jdbc.password=PASSWORD
+hibernate.show_sql=true
+hibernate.hbm2ddl.auto=update
