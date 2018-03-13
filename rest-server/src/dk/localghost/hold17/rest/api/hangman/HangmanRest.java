@@ -61,7 +61,7 @@ public class HangmanRest {
     /**
      * Get an active game for the specified user
      * @param servletRequest web request
-     * @return current state of the game, or 404 if it does not exist
+     * @return current state of the game, or bad request if it does not exist
      */
     @AuthenticationEndpoint.Auth
     @GET
@@ -89,7 +89,7 @@ public class HangmanRest {
         // 404 if it does not exist
         if (hangman == null) {
             ErrorObj err = new ErrorObj("not_found", "No game exist for this user yet.");
-            return Response.status(Response.Status.NOT_FOUND).entity(gson.toJson(err)).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(err)).build();
         }
 
         HangmanGame currentGame = new HangmanGame(hangman);
