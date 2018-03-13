@@ -57,7 +57,7 @@ public class HangmanHelper {
         token = auth.extractToken(token);
         URL hangmanUrl = null;
 
-        // If a game existrs, return null
+        // If a game exists, return null
         if (auth.isGameCreated(token)) return null;
 
         // Get the url of the soap wsdl
