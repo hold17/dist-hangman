@@ -1,6 +1,7 @@
 package dk.localghost.hold17.rest.api.hangman;
 
 import com.google.gson.Gson;
+import com.sun.xml.internal.ws.fault.ServerSOAPFaultException;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.HangmanGame;
 import dk.localghost.hold17.dto.Token;
@@ -17,6 +18,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+@SuppressWarnings("Duplicates")
 
 @Path("hangman")
 public class HangmanRest {
@@ -86,7 +89,6 @@ public class HangmanRest {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
         }
 
-        // 404 if it does not exist
         if (hangman == null) {
             ErrorObj err = new ErrorObj("not_found", "No game exist for this user yet.");
             return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(err)).build();
@@ -189,14 +191,16 @@ public class HangmanRest {
         } catch (AuthenticationException e) {
             ErrorObj err = new ErrorObj("authentication_exception", e.getMessage());
             return Response.status(Response.Status.UNAUTHORIZED).entity(err).build();
+        } catch (ServerSOAPFaultException e) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("serversoapfault_exception");
+            err.setError_message("Game finished but could not execute createHighScore() in HangmanLogic.java.");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
         }
 
         HangmanGame currentGame = new HangmanGame(hangman);
+        return Response.status(Response.Status.ACCEPTED).entity(gson.toJson(currentGame)).build();
 
-        return Response
-                .status(Response.Status.ACCEPTED)
-                .entity(gson.toJson(currentGame))
-                .build();
     }
 
     @AuthenticationEndpoint.Auth
