@@ -6,7 +6,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceUnit;
-import java.util.Date;
 import java.util.List;
 
 public class Database {
@@ -26,22 +25,21 @@ public class Database {
         entityManagerFactory.close();
     }
 
-    public void doStuff() {
+    public void insertNewHighScore(HighScore highScore) {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
-        entityManager.persist( new HighScore( new Date(), "Bob", 123 , 420, "bigword", "qtyshj") );
-        entityManager.persist( new HighScore( new Date(), "Robert", 234, 69, "biggerword", "mnzxlk") );
+        entityManager.persist(highScore);
         entityManager.getTransaction().commit();
         entityManager.close();
+    }
 
-        entityManager = entityManagerFactory.createEntityManager();
+    public List<HighScore> getListOfHighScores() {
+        EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
         List<HighScore> result = entityManager.createQuery("from HighScore", HighScore.class).getResultList();
-        for (HighScore highScore : result) {
-            System.out.println("HighScore (" + highScore.getDate() + ") : playerName: " + highScore.getPlayerName() + " : score: " + highScore.getScore());
-        }
         entityManager.getTransaction().commit();
         entityManager.close();
+        return result;
     }
 
 }
