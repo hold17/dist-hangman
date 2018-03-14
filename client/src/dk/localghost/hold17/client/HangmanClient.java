@@ -93,41 +93,43 @@ public class HangmanClient {
 
     public void startGame() throws AuthenticationException {
         if (hangman == null) throw new NullPointerException("Connection to server was unsuccessful, hangman object is still null.");
+
         if (!hangman.hasGameBegun()) hangman.startNewGame(token);
-            while(!hangman.isGameOver()) {
-                System.out.println("Game has started. The word has " + hangman.getVisibleWord().length() + " letters.\n");
-                displayStatus();
 
-                String letterToGuess = UserInteraction.getLetter();
+        System.out.println("Game has started. The word has " + hangman.getVisibleWord().length() + " letters.\n");
 
-                // Cheat
-                if (letterToGuess.equals("isuckathangman")) {
-                    System.out.println("word: " + hangman.getWord());
-                    continue;
-                }
+        while(!hangman.isGameOver()) {
+            displayStatus();
 
-                try {
-                    hangman.guess(letterToGuess, token);
+            String letterToGuess = UserInteraction.getLetter();
 
-                } catch (AuthenticationException e) {
-                    System.err.println(e.getMessage());
-                    token = authenticateUser();
-                }
+            // Cheat
+            if (letterToGuess.equals("isuckathangman")) {
+                System.out.println("word: " + hangman.getWord());
+                continue;
             }
 
-            hangman.logStatus();
-            System.out.println("Game was " + (hangman.isGameWon() ? "won" : "lost") + ". \n\n");
-            System.out.println("Your final score was " + hangman.getCurrentScore() + " with a time of " + hangman.getFormattedTime());
-            if (!UserInteraction.getString("Press 'enter' to start a new game or 'q' and 'enter' to exit").toLowerCase().equals("q")) {
-/*                try {
-                    hangman = connectToHangmanService(auth, token);
-                } catch (MalformedURLException e) {}*/
-                if (hangman.isGameLost())
-                    hangman.resetScoreAndTime(token);
-                startGame();
-            } else {
-                auth.endGame(token);
+            try {
+                hangman.guess(letterToGuess, token);
+
+            } catch (AuthenticationException e) {
+                System.err.println(e.getMessage());
+                token = authenticateUser();
             }
+        } // end loop
+        displayStatus();
+
+        hangman.logStatus();
+
+        System.out.println("Game was " + (hangman.isGameWon() ? "won" : "lost") + ". \n\n");
+        System.out.println("Your final score was " + hangman.getCurrentScore() + " with a time of " + hangman.getFormattedTime());
+        if (!UserInteraction.getString("Press 'enter' to start a new game or 'q' and 'enter' to exit").toLowerCase().equals("q")) {
+            if (hangman.isGameLost())
+                hangman.resetScoreAndTime(token);
+            startGame();
+        } else {
+            auth.endGame(token);
+        }
     }
 
     private void displayStatus() {

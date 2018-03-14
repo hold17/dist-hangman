@@ -11,6 +11,7 @@ public class HighScore {
     private String correctWord;
     private String wrongLetters;
 
+    public HighScore() {}
     public HighScore(long id, Date date, String playerName, int score, String time, String correctWord, String wrongLetters) {
         this.id = id;
         this.date = date;
@@ -41,5 +42,27 @@ public class HighScore {
     }
     public String getWrongLetters() {
         return wrongLetters;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    public void setDate(Date date) {
+        this.date = date;
+    }
+    public void setPlayerName(String playerName) {
+        this.playerName = playerName;
+    }
+    public void setScore(int score) {
+        this.score = score;
+    }
+    public void setTime(String time) {
+        this.time = time;
+    }
+    public void setCorrectWord(String correctWord) {
+        this.correctWord = correctWord;
+    }
+    public void setWrongLetters(String wrongLetters) {
+        this.wrongLetters = wrongLetters;
     }
 }

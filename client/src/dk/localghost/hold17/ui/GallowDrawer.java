@@ -14,9 +14,9 @@ public class GallowDrawer {
                 "       ||     ",
                 "       ||    ",
                 "       ||",
-                "    --------",
-                "   /         \\",
-                "__/            \\__"};
+                "    ___||___",
+                "   /        \\",
+                "__/          \\__"};
 
         String head = "( )";
         String leftArm1 = "/";

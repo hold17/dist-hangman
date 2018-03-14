@@ -14,9 +14,14 @@ import java.util.HashMap;
 @WebService(endpointInterface = "dk.localghost.hold17.transport.IAuthentication")
 public class Authentication implements IAuthentication {
     private HashMap<String, Endpoint> hangmanServices;
+    private static Endpoint dbHandlerEndpoint;
 
     public Authentication() {
         hangmanServices = new HashMap<>();
+
+        // create DatabaseHandler
+        if (dbHandlerEndpoint == null)
+            dbHandlerEndpoint = Endpoint.publish(getDatabaseHandlerServiceURL(), new DatabaseHandler());
     }
 
     @Override
@@ -81,5 +86,9 @@ public class Authentication implements IAuthentication {
         System.out.println(userName + " just ended his game.");
         hangmanServices.get(userName).stop();
         hangmanServices.remove(userName);
+    }
+
+    public String getDatabaseHandlerServiceURL() {
+        return "http://" + Server.ADDRESS + ":" + Server.PORT + "/" + Server.ADDRESS_HANGMAN + "/highscores";
     }
 }
