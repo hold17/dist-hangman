@@ -186,6 +186,13 @@ public class HangmanRest {
             return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(err)).build();
         }
 
+        if (!hangman.hasGameBegun()) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("game_not_started");
+            err.setError_message("The game has not started yet. Send a PUT request to /api/hangman/game");
+            return Response.status(Response.Status.BAD_REQUEST).entity(gson.toJson(err)).build();
+        }
+
         try {
             hangman.guess(letter, token);
         } catch (AuthenticationException e) {
