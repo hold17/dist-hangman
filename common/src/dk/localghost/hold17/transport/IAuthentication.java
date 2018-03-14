@@ -17,4 +17,5 @@ public interface IAuthentication {
     String getHangmanServiceURL(Token token);
     void forgotPassword(String userName) throws ConnectivityException;
     void endGame(Token Token);
+    String getDatabaseHandlerServiceURL();
 }

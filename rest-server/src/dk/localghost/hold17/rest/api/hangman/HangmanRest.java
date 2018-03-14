@@ -4,8 +4,10 @@ import com.google.gson.Gson;
 import com.sun.xml.internal.ws.fault.ServerSOAPFaultException;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.HangmanGame;
+import dk.localghost.hold17.dto.HighScore;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.AuthorizationHelper;
+import dk.localghost.hold17.helpers.DatabaseHelper;
 import dk.localghost.hold17.helpers.FatalServerException;
 import dk.localghost.hold17.helpers.HangmanHelper;
 import dk.localghost.hold17.rest.api.ErrorObj;
@@ -18,6 +20,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 @SuppressWarnings("Duplicates")
 
@@ -117,6 +120,7 @@ public class HangmanRest {
 
         Token token = new Token();
         token.setAccess_token(tokenStr);
+
         token = AuthorizationHelper.getAuthService().extractToken(token);
 
         final IHangman hangman;
@@ -233,4 +237,23 @@ public class HangmanRest {
 
         return Response.ok().build();
     }
+
+    @GET
+    @Path("highscores")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getHighScoreList() {
+
+        List<HighScore> hsList;
+        try {
+            hsList = DatabaseHelper.CreateNewHandler().getHighScoreList();
+        } catch (FatalServerException e) {
+            ErrorObj err = new ErrorObj();
+            err.setError_type("internal_server_error");
+            err.setError_message(e.getMessage());
+
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        }
+        return Response.accepted().entity(gson.toJson(hsList)).build();
+    }
+
 }

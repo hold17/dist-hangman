@@ -15,13 +15,13 @@ public class Database {
             unitName = "testdatabase"
     )
     private EntityManagerFactory entityManagerFactory;
-    public Database() {
-        createEntityManagerFactory();
+    public Database(Properties props) {
+        createEntityManagerFactory(props);
     }
 
-    protected void createEntityManagerFactory() {
+    protected void createEntityManagerFactory(Properties props) {
         // TODO: rename to something production ready
-        entityManagerFactory = Persistence.createEntityManagerFactory("testdatabase", Server.properties);
+        entityManagerFactory = Persistence.createEntityManagerFactory("testdatabase", props);
     }
 
     protected void closeEntityManagerFactory() {
