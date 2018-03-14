@@ -38,6 +38,7 @@ public class TokenHelper {
         return token;
     }
 
+    // TODO: change argument from Token token to String tokenStr
     public static Token extractToken(Token token) {
         final Claims claims = Jwts.parser().setSigningKey(AUTH_KEY).parseClaimsJws(token.getAccess_token()).getBody();
         final ObjectMapper objm = new ObjectMapper();

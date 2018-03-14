@@ -6,7 +6,25 @@
         <filter>
             <filter-name>corsFilter</filter-name>
             <filter-class>com.thetransactioncompany.cors.CORSFilter</filter-class>
+
+            <init-param>
+                <param-name>cors.allowOrigin</param-name>
+                <param-value>*</param-value>
+            </init-param>
+            <init-param>
+                <param-name>cors.supportsCredentials</param-name>
+                <param-value>false</param-value>
+            </init-param>
+            <init-param>
+                <param-name>cors.supportedHeaders</param-name>
+                <param-value>accept, authorization, origin</param-value>
+            </init-param>
+            <init-param>
+                <param-name>cors.supportedMethods</param-name>
+                <param-value>GET, POST, PUT, DELETE, HEAD, OPTIONS</param-value>
+            </init-param>
         </filter>
+
         <!--Allows Cross origin requests -remove if api should not be public-->
         <filter-mapping>
             <filter-name>corsFilter</filter-name>
