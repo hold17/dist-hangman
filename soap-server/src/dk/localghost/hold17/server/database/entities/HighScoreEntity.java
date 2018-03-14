@@ -1,4 +1,4 @@
-package dk.localghost.hold17.server.database.data;
+package dk.localghost.hold17.server.database.entities;
 
 import java.util.Date;
 import javax.persistence.*;
@@ -7,7 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table( name = "HIGHSCORES" )
-public class HighScore {
+public class HighScoreEntity {
     @Id
     @GeneratedValue(generator="increment")
     @GenericGenerator(name="increment", strategy = "increment")
@@ -32,11 +32,11 @@ public class HighScore {
     @Basic
     private String wrongLetters;
 
-    public HighScore() {
+    public HighScoreEntity() {
         // this form used by Hibernate
     }
 
-    public HighScore(Date date, String playerName, int score, String time, String correctWord, String wrongLetters) {
+    public HighScoreEntity(Date date, String playerName, int score, String time, String correctWord, String wrongLetters) {
         // for application use, to create new events
         this.date = date;
         this.playerName = playerName;
