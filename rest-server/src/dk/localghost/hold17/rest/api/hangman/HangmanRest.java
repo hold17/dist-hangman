@@ -166,6 +166,7 @@ public class HangmanRest {
 
         Token token = new Token();
         token.setAccess_token(tokenStr);
+        token = AuthorizationHelper.getAuthService().extractToken(token);
 
         final IHangman hangman;
 
