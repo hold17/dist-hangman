@@ -21,6 +21,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
+    /**
+     * Validates a specific token given as an authorization header
+     * @param containerRequestContext
+     */
     @Override
     public void filter(ContainerRequestContext containerRequestContext) {
         // Get http header from the request

@@ -17,10 +17,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Endpoint for handling authorization
+ */
 @Path(Routes.OAUTH_AUTHORIZE)
 public class AuthenticationEndpoint {
     private static final Gson gson = new Gson();
 
+    /**
+     * Contacts SOAP service to generate a token for the user
+     * @param username Form url encoded username
+     * @param password Form url encoded password
+     * @return A token and user object for a valid user or an error message encoded as json
+     */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
@@ -46,6 +55,9 @@ public class AuthenticationEndpoint {
         }
     }
 
+    /**
+     * Auth annotation. This annotation forces an endpoint to include an authorization header
+     */
     @NameBinding
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE, ElementType.METHOD})
