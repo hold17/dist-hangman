@@ -2,6 +2,7 @@ package dk.localghost.hold17.server;
 
 import dk.localghost.hold17.transport.IAuthentication;
 import javax.xml.ws.Endpoint;
+import java.nio.file.Paths;
 
 public class Server {
     private static final DatabaseHandler dbh = new DatabaseHandler();
@@ -28,6 +29,11 @@ public class Server {
         }
         IAuthentication auth = new Authentication();
         Endpoint.publish("http://" + ADDRESS + ":" + PORT + "/" + ADDRESS_AUTH, auth);
+
+        String thePath = Paths.get("").toAbsolutePath().toString() + "/dbsettings.properties";
+        thePath = thePath.replace("//", "/");
+
+        System.out.println("Looking for " + thePath);
         System.out.println("Server started on " + ADDRESS + " port " + PORT);
     }
 }

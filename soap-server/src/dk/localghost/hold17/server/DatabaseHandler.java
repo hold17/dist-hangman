@@ -9,6 +9,7 @@ import javax.jws.WebService;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Properties;
 
@@ -19,10 +20,11 @@ public class DatabaseHandler implements IDatabaseHandler {
     private static Properties loadDatabaseSettingsFromFile() {
         Properties props = new Properties();
 
-        final String currentPath = System.getProperty("user.dir");
+        final String currentPath = Paths.get("").toAbsolutePath().toString();
+        final String propertiesPath = (currentPath + "/dbsettings.properties").replace("//", "/");
 
         try {
-            FileInputStream fs = new FileInputStream(currentPath + "/dbsettings.properties");
+            FileInputStream fs = new FileInputStream(propertiesPath);
             props.load(fs);
         } catch (FileNotFoundException e) {
             System.err.println("dbsettings could not be found at path: " + currentPath + "/");
