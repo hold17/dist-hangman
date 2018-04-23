@@ -16,13 +16,15 @@ public class HangmanGame {
     private String time;
     private int score;
 
+    private String finalGuessWord;
+
     public HangmanGame() { }
+
     public HangmanGame(IHangman game) { this.setGame(game); }
 
     public ArrayList<String> getUsedLetters() {
         return usedLetters;
     }
-
     public void setUsedLetters(ArrayList<String> usedLetters) {
         this.usedLetters = usedLetters;
     }
@@ -99,6 +101,14 @@ public class HangmanGame {
         this.score = score;
     }
 
+    public String getFinalGuessWord() {
+        return finalGuessWord;
+    }
+
+    private void setFinalGuessWord(String finalGuessWord) {
+        this.finalGuessWord = finalGuessWord;
+    }
+
     public void setGame(IHangman hangman) {
         this.setWrongLettersCount(hangman.getWrongLettersCount());
         this.setLastGuessedLetterIsCorrect(hangman.isLastLetterCorrect());
@@ -110,5 +120,9 @@ public class HangmanGame {
         this.setHasGameBegun(hangman.hasGameBegun());
         this.setScore(hangman.getCurrentScore());
         this.setTime(hangman.getFormattedTime());
+
+        if(wrongLettersCount > 5) {
+            this.setFinalGuessWord(hangman.getWord());
+        }
     }
 }

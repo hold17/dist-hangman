@@ -205,7 +205,7 @@ public class HangmanRest {
             return Response.status(Response.Status.UNAUTHORIZED).entity(err).build();
         } catch (ServerSOAPFaultException e) {
             ErrorObj err = new ErrorObj();
-            err.setError_type("serversoapfault_exception");
+                err.setError_type("serversoapfault_exception");
             err.setError_message("Game finished but could not execute createHighScore() in HangmanLogic.java.");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
         }
@@ -255,5 +255,6 @@ public class HangmanRest {
         }
         return Response.accepted().entity(gson.toJson(hsList)).build();
     }
+
 
 }
