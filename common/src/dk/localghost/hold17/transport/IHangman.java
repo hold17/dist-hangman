@@ -17,7 +17,8 @@ public interface IHangman {
     String getUniqueLettersOfWord();
     int getWrongLettersCount();
     int getCurrentScore();
-    long getCurrentTime();
+    long getCurrentSessionTime();
+    long getInstanceLastActiveTime();
     boolean isLastLetterCorrect();
     boolean isGameWon();
     boolean isGameLost();
