@@ -39,7 +39,7 @@ public class Database {
     public List<HighScore> getListOfHighScores() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
-        List<HighScoreEntity> result = entityManager.createQuery("from HighScoreEntity order by score", HighScoreEntity.class).getResultList();
+        List<HighScoreEntity> result = entityManager.createQuery("from HighScoreEntity order by score desc", HighScoreEntity.class).getResultList();
         entityManager.getTransaction().commit();
         entityManager.close();
 
