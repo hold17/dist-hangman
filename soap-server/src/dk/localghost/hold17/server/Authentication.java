@@ -123,7 +123,7 @@ public class Authentication implements IAuthentication {
 
         public void run() {
             System.out.println("CleanUpThread Started");
-            executor.scheduleAtFixedRate(this::cleanUp, 0, 20L, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(this::cleanUp, 0, 1L, TimeUnit.HOURS);
         }
     }
 }
