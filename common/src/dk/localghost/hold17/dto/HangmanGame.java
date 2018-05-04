@@ -7,6 +7,10 @@ import java.util.ArrayList;
 public class HangmanGame {
     private ArrayList<String> usedLetters = new ArrayList<>();
     private String visibleWord;
+    private String wordDefinition;
+    private String wordExampleBefore;
+    private String wordExampleAfter;
+    private String[] wordSynonyms;
     private int wrongLettersCount;
     private boolean lastGuessedLetterIsCorrect;
     private boolean gameHasBeenWon;
