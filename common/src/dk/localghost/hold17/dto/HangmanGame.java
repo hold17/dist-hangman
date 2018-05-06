@@ -102,9 +102,7 @@ public class HangmanGame {
     }
 
     public String getFinalGuessWord() {
-        if (this.isGameOver)
-            return finalGuessWord;
-        else return "NO CHEATING!!";
+        return finalGuessWord;
     }
 
     private void setFinalGuessWord(String finalGuessWord) {
@@ -122,6 +120,6 @@ public class HangmanGame {
         this.setHasGameBegun(hangman.hasGameBegun());
         this.setScore(hangman.getCurrentScore());
         this.setTime(hangman.getFormattedTime());
-        this.setFinalGuessWord(hangman.getWord());
+        if (hangman.isGameOver()) this.setFinalGuessWord(hangman.getWord());
     }
 }
