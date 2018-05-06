@@ -9,15 +9,25 @@ import dk.localghost.hold17.transport.IAuthentication;
 
 import javax.jws.WebService;
 import javax.xml.ws.Endpoint;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @WebService(endpointInterface = "dk.localghost.hold17.transport.IAuthentication")
 public class Authentication implements IAuthentication {
     private HashMap<String, Endpoint> hangmanServices;
+    private List<String> usersPlaying;
     private static Endpoint dbHandlerEndpoint;
 
     public Authentication() {
         hangmanServices = new HashMap<>();
+        usersPlaying = new ArrayList<>();
+
+        CleanUpThread cleanUpThread = new CleanUpThread();
+        new Thread(cleanUpThread).start();
 
         // create DatabaseHandler
         if (dbHandlerEndpoint == null)
@@ -40,6 +50,7 @@ public class Authentication implements IAuthentication {
     @Override
     public void createHangmanService(Token token) {
         String userName = token.getUser().getUsername();
+        usersPlaying.add(userName);
 
         if (hangmanServices.get(userName) == null) {
             HangmanLogic hangman = new HangmanLogic();
@@ -82,13 +93,42 @@ public class Authentication implements IAuthentication {
         if (!TokenHelper.isTokenValid(token)) return;
 
         String userName = token.getUser().getUsername();
+        usersPlaying.remove(userName);
 
         System.out.println(userName + " just ended his game.");
+
         hangmanServices.get(userName).stop();
         hangmanServices.remove(userName);
     }
 
     public String getDatabaseHandlerServiceURL() {
         return "http://" + Server.ADDRESS + ":" + Server.PORT + "/" + Server.ADDRESS_HANGMAN + "/highscores";
+    }
+
+    private class CleanUpThread implements Runnable {
+        final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        private void cleanUp() {
+            try {
+                System.out.println("Scheduled cleanUp started");
+                for (String s : usersPlaying) {
+                    long time = ((HangmanLogic) hangmanServices.get(s).getImplementor()).getInstanceLastActiveTime();
+                    time = System.currentTimeMillis() - time;
+                    if (time > 60000) {
+                        hangmanServices.get(s).stop();
+                        hangmanServices.remove(s);
+                        System.out.println(s + ": Game Stopped");
+                        usersPlaying.remove(s);
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("ScheduleAtFixedRate failed");
+            }
+        }
+
+        public void run() {
+            System.out.println("CleanUpThread Started");
+            executor.scheduleAtFixedRate(this::cleanUp, 0, 1L, TimeUnit.HOURS);
+        }
     }
 }
