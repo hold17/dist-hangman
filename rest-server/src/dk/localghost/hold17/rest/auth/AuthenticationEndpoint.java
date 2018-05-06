@@ -3,13 +3,15 @@ package dk.localghost.hold17.rest.auth;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.ws.WebServiceException;
 
 import com.google.gson.Gson;
 import dk.localghost.authwrapper.dto.User;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.AuthorizationHelper;
-import dk.localghost.hold17.rest.api.ErrorObj;
+import dk.localghost.hold17.helpers.ErrorBuilder;
+import dk.localghost.hold17.helpers.ErrorObj;
 import dk.localghost.hold17.rest.config.Routes;
 
 import java.lang.annotation.ElementType;
@@ -52,6 +54,8 @@ public class AuthenticationEndpoint {
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.UNAUTHORIZED).entity(gson.toJson(err)).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
     }
 

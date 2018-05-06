@@ -6,11 +6,7 @@ import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.HangmanGame;
 import dk.localghost.hold17.dto.HighScore;
 import dk.localghost.hold17.dto.Token;
-import dk.localghost.hold17.helpers.AuthorizationHelper;
-import dk.localghost.hold17.helpers.DatabaseHelper;
-import dk.localghost.hold17.helpers.FatalServerException;
-import dk.localghost.hold17.helpers.HangmanHelper;
-import dk.localghost.hold17.rest.api.ErrorObj;
+import dk.localghost.hold17.helpers.*;
 import dk.localghost.hold17.rest.auth.AuthenticationEndpoint;
 import dk.localghost.hold17.transport.IHangman;
 
@@ -20,6 +16,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.ws.WebServiceException;
 import java.util.List;
 
 @SuppressWarnings("Duplicates")
@@ -54,6 +51,8 @@ public class HangmanRest {
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
 
         HangmanGame currentGame = new HangmanGame(hangman);
@@ -90,6 +89,8 @@ public class HangmanRest {
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
 
         if (hangman == null) {
@@ -133,6 +134,8 @@ public class HangmanRest {
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
 
         if (hangman == null) {
@@ -147,8 +150,9 @@ public class HangmanRest {
         } catch (AuthenticationException e) {
             ErrorObj err = new ErrorObj("authentication_exception", e.getMessage());
             return Response.status(Response.Status.UNAUTHORIZED).entity(err).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
-
         HangmanGame game = new HangmanGame(hangman);
 
         return Response.accepted().entity(gson.toJson(game)).build();
@@ -182,6 +186,8 @@ public class HangmanRest {
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
 
         if (hangman == null) {
@@ -208,8 +214,9 @@ public class HangmanRest {
             err.setError_type("serversoapfault_exception");
             err.setError_message("Game finished but could not execute createHighScore() in HangmanLogic.java.");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
-
         HangmanGame currentGame = new HangmanGame(hangman);
         return Response.status(Response.Status.ACCEPTED).entity(gson.toJson(currentGame)).build();
 
@@ -233,6 +240,8 @@ public class HangmanRest {
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
 
         return Response.ok().build();
@@ -242,8 +251,8 @@ public class HangmanRest {
     @Path("highscores")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getHighScoreList() {
+        final List<HighScore> hsList;
 
-        List<HighScore> hsList;
         try {
             hsList = DatabaseHelper.CreateNewHandler().getHighScoreList();
         } catch (FatalServerException e) {
@@ -252,7 +261,10 @@ public class HangmanRest {
             err.setError_message(e.getMessage());
 
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(gson.toJson(err)).build();
+        } catch (WebServiceException e) {
+            return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
+
         return Response.accepted().entity(gson.toJson(hsList)).build();
     }
 }
