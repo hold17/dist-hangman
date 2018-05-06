@@ -1,4 +1,4 @@
-package dk.localghost.hold17.rest.api;
+package dk.localghost.hold17.helpers;
 
 public class ErrorObj {
     private String error_type;
