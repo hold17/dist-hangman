@@ -230,25 +230,24 @@ public class HangmanLogic implements IHangman {
     }
 
     private void prepareGameType() throws InvalidWordException {
+        final Future<List<String>> futureExample = fetchWordExample(word);
+
         findWordFromServerFile("https://db.localghost.dk/words.txt");
         gameType = new Random().nextInt(2) + 1;
+
         try {
             switch (gameType) {
                 case 1:
                     wordDefinition = fetchWordDefinition(word).get(3000, TimeUnit.MILLISECONDS);
-                    wordExampleBefore = fetchWordExample(word).get(3000, TimeUnit.MILLISECONDS).get(0);
-                    wordExampleAfter = fetchWordExample(word).get(3000, TimeUnit.MILLISECONDS).get(1);
                     break;
-
                 case 2:
                     wordSynonyms = fetchWordSynonyms(word).get(3000, TimeUnit.MILLISECONDS);
-                    wordExampleBefore = fetchWordExample(word).get(3000, TimeUnit.MILLISECONDS).get(0);
-                    wordExampleAfter = fetchWordExample(word).get(3000, TimeUnit.MILLISECONDS).get(1);
-                    break;
-
-                default:
                     break;
             }
+
+            final List<String> example = futureExample.get(3000, TimeUnit.MILLISECONDS);
+            wordExampleBefore = example.get(0);
+            wordExampleAfter  = example.get(1);
         } catch(ExecutionException | InterruptedException | TimeoutException e) {
             throw new InvalidWordException(word);
         }
