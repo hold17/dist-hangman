@@ -186,7 +186,7 @@ public class HangmanLogic implements IHangman {
     public void printGameStateToServerConsole(Token token) {
         System.out.println(token.getUser().getUsername()
                 + " started a new game of type " + getGameTypeAsString(gameType) + ". "
-                + " The new word is " + this.word);
+                + " The new word is \"" + this.word + "\"");
     }
     public void reset(Token token) throws AuthenticationException {
         authenticateUserToken(token);
@@ -230,25 +230,28 @@ public class HangmanLogic implements IHangman {
     }
 
     private void prepareGameType() throws InvalidWordException {
-        final Future<List<String>> futureExample = fetchWordExample(word);
-
         findWordFromServerFile("https://db.localghost.dk/words.txt");
+        final Future<List<String>> futureExample = fetchWordExampleAsync(word);
+
         gameType = new Random().nextInt(2) + 1;
 
         try {
             switch (gameType) {
                 case 1:
-                    wordDefinition = fetchWordDefinition(word).get(3000, TimeUnit.MILLISECONDS);
+//                    wordDefinition = fetchWordDefinitionAsync(word).get(3000, TimeUnit.MILLISECONDS);
+                    wordDefinition = fetchWordDefinitionAsync(word).get();
                     break;
                 case 2:
-                    wordSynonyms = fetchWordSynonyms(word).get(3000, TimeUnit.MILLISECONDS);
+//                    wordSynonyms = fetchWordSynonymsAsync(word).get(3000, TimeUnit.MILLISECONDS);
+                    wordSynonyms = fetchWordSynonymsAsync(word).get();
                     break;
             }
 
-            final List<String> example = futureExample.get(3000, TimeUnit.MILLISECONDS);
+//            final List<String> example = futureExample.get(3000, TimeUnit.MILLISECONDS);
+            final List<String> example = futureExample.get();
             wordExampleBefore = example.get(0);
             wordExampleAfter  = example.get(1);
-        } catch(ExecutionException | InterruptedException | TimeoutException e) {
+        } catch(ExecutionException | InterruptedException/* | TimeoutException*/ e) {
             throw new InvalidWordException(word);
         }
     }
@@ -269,46 +272,64 @@ public class HangmanLogic implements IHangman {
         visibleWord = sb.toString();
     }
 
-    private static CompletableFuture<String> fetchWordDefinition(final String word) {
-        final CompletableFuture<String> completableFuture = new CompletableFuture<>();
-        Executors.newCachedThreadPool().submit(() -> {
-            final Definitions definitions = WordService.getDefinitionAsync(word).execute().body();
+    private static CompletableFuture<String> fetchWordDefinitionAsync(final String word) {
+        final CompletableFuture<String> completableFuture = CompletableFuture.supplyAsync(() -> {
+            Definitions definitions = null;
+
+            try {
+                definitions = WordService.getDefinitionAsync(word).execute().body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             final String definition = definitions.getDefinitions().get(0).getDefinition();
 
-            return completableFuture.complete(definition);
+            return definition;
         });
 
          return completableFuture;
         }
 
-    private static CompletableFuture<List<String>> fetchWordSynonyms(final String word) {
-        final CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
-        List<String> wordSynonyms = new ArrayList<>();
+    private static CompletableFuture<List<String>> fetchWordSynonymsAsync(final String word) {
+        final List<String> wordSynonyms = new ArrayList<>();
+        final CompletableFuture<List<String>> completableFuture = CompletableFuture.supplyAsync(() -> {
+            Synonyms synonyms = null;
 
-        Executors.newCachedThreadPool().submit(() -> {
-            final Synonyms synonyms = WordService.getSynonymsAsync(word).execute().body();
+            try {
+                synonyms = WordService.getSynonymsAsync(word).execute().body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             for (int i = 0; i < synonyms.getSynonyms().size() && i < 6; i++) {
                 wordSynonyms.add(synonyms.getSynonyms().get(i));
             }
 
-            return completableFuture.complete(wordSynonyms);
+            return wordSynonyms;
         });
 
         return completableFuture;
     }
 
-    private static CompletableFuture<List<String>> fetchWordExample(final String word) throws InvalidWordException{
-        final CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
-        List<String> splitExamples = new ArrayList<>();
-        Executors.newCachedThreadPool().submit(() -> {
-            final Examples examples = WordService.getExampleAsync(word).execute().body();
+    private static CompletableFuture<List<String>> fetchWordExampleAsync(final String word) throws InvalidWordException{
+        final List<String> splitExamples = new ArrayList<>();
+        final CompletableFuture<List<String>> completableFuture = CompletableFuture.supplyAsync(() -> {
+            Examples examples = null;
+
+            try {
+                examples = WordService.getExampleAsync(word).execute().body();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             final String wordExample = examples.getExamples().get(0);
             final String wordExampleBefore = wordExample.split(word)[0];
             final String wordExampleAfter = wordExample.split(word)[1];
+
             splitExamples.add(wordExampleBefore);
             splitExamples.add(wordExampleAfter);
 
-            return completableFuture.complete(splitExamples);
+            return splitExamples;
         });
 
         return completableFuture;
