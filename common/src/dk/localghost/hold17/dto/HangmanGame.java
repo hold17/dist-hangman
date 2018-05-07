@@ -130,9 +130,7 @@ public class HangmanGame {
     public void setWordSynonyms(List<String> wordSynonyms) { this.wordSynonyms = wordSynonyms; }
 
     public String getFinalGuessWord() {
-        if (this.isGameOver)
-            return finalGuessWord;
-        else return "NO CHEATING!!";
+        return finalGuessWord;
     }
 
     private void setFinalGuessWord(String finalGuessWord) {
@@ -156,5 +154,6 @@ public class HangmanGame {
         this.setWordSynonyms(hangman.getWordSynonyms());
         this.setWordExampleBefore(hangman.getWordExampleBefore());
         this.setWordExampleAfter(hangman.getWordExampleAfter());
+        if (hangman.isGameOver()) this.setFinalGuessWord(hangman.getWord());
     }
 }

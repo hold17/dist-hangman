@@ -3,7 +3,7 @@ package dk.localghost.hold17.rest.auth;
 import com.google.gson.Gson;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.helpers.AuthorizationHelper;
-import dk.localghost.hold17.rest.api.ErrorObj;
+import dk.localghost.hold17.helpers.ErrorObj;
 import dk.localghost.hold17.rest.config.Routes;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,5 +41,8 @@ public class Validation {
     }
 
     @GET
-    public String test() { return "hej med dig"; }
+    @Path("tea")
+    public Response iAmATeapot() {
+        return Response.status(418).entity("No tea here, sorry.").build();
+    }
 }
