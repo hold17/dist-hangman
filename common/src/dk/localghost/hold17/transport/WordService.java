@@ -11,21 +11,21 @@ public class WordService {
             .baseUrl("https://wordsapiv1.p.mashape.com")
             .addConverterFactory(GsonConverterFactory.create());
 
-    public static Call<Definitions> getDefinitionAsync(final String word) {
+    public static Call<Definitions> getDefinitionAsync(final String word) throws IndexOutOfBoundsException {
         final Retrofit retrofit = builder.build();
 
         IWordClient wordClient = retrofit.create(IWordClient.class);
         return wordClient.getDefinition(word);
     }
 
-    public static Call<Examples> getExampleAsync(final String word) {
+    public static Call<Examples> getExampleAsync(final String word) throws IndexOutOfBoundsException {
         final Retrofit retrofit = builder.build();
 
         IWordClient wordClient = retrofit.create(IWordClient.class);
         return wordClient.getExample(word);
     }
 
-    public static Call<Synonyms> getSynonymsAsync(final String word) {
+    public static Call<Synonyms> getSynonymsAsync(final String word) throws IndexOutOfBoundsException {
         final Retrofit retrofit = builder.build();
 
         IWordClient wordClient = retrofit.create(IWordClient.class);

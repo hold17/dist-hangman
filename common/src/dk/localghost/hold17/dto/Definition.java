@@ -6,18 +6,13 @@ public class Definition {
 
     public Definition() {}
 
-    public String getDefinition() {
-        return definition;
-    }
-
+    public String getDefinition() { return definition; }
     public void setDefinition(String definition) {
         this.definition = definition;
     }
-
     public String getPartOfSpeech() {
         return partOfSpeech;
     }
-
     public void setPartOfSpeech(String partOfSpeech) {
         this.partOfSpeech = partOfSpeech;
     }

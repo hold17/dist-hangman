@@ -11,15 +11,12 @@ public class Definitions {
     public String getWord() {
         return word;
     }
-
     public void setWord(String word) {
         this.word = word;
     }
-
     public List<Definition> getDefinitions() {
         return definitions;
     }
-
     public void setDefinitions(List<Definition> definitions) {
         this.definitions = definitions;
     }

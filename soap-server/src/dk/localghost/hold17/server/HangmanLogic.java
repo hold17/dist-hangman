@@ -1,10 +1,20 @@
 package dk.localghost.hold17.server;
 
+import com.sun.xml.internal.ws.util.CompletedFuture;
 import dk.localghost.authwrapper.transport.AuthenticationException;
+import dk.localghost.hold17.dto.Definitions;
+import dk.localghost.hold17.dto.Examples;
+import dk.localghost.hold17.dto.Synonyms;
 import dk.localghost.hold17.dto.Token;
+import dk.localghost.hold17.helpers.FatalServerException;
+import dk.localghost.hold17.helpers.InvalidWordException;
 import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.server.database.entities.HighScoreEntity;
 import dk.localghost.hold17.transport.IHangman;
+import dk.localghost.hold17.transport.WordService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import javax.jws.WebService;
 import java.io.BufferedReader;
@@ -12,17 +22,24 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 @WebService(endpointInterface = "dk.localghost.hold17.transport.IHangman")
 public class HangmanLogic implements IHangman {
     private static DatabaseHandler dbh = new DatabaseHandler();
-    private ArrayList<String> possibleWords = new ArrayList<>();
+    private List<String> possibleWords = new ArrayList<>();
+    private List<String> wordSynonyms = new ArrayList<>();
+    private List<String> usedLetters = new ArrayList<>();
     private String word;
-    private ArrayList<String> usedLetters = new ArrayList<>();
+    private String wordDefinition;
+    private String wordExampleBefore;
+    private String wordExampleAfter;
     private String visibleWord;
+    private int gameType;
     private int wrongLettersCount;
     private int correctlyGuessedLettersCount;
+    private int currentScore;
+    private int totalScore;
     private boolean lastGuessedLetterIsCorrect;
     private boolean gameHasBeenWon;
     private boolean gameHasBeenLost;
@@ -31,8 +48,6 @@ public class HangmanLogic implements IHangman {
     private long currentSessionTime;
     private long totalTime;
     private long instanceLastActiveTime;
-    private int currentScore;
-    private int totalScore;
 
     public HangmanLogic() {
         this.hasGameBegun = false;
@@ -46,6 +61,7 @@ public class HangmanLogic implements IHangman {
     public HangmanLogic(HangmanLogic hangman) {
         this.possibleWords = hangman.getPossibleWords();
         this.word = hangman.getWord();
+        this.gameType = hangman.getGameType();
         this.usedLetters = hangman.getUsedLetters();
         this.visibleWord = hangman.getVisibleWord();
         this.wrongLettersCount = hangman.getWrongLettersCount();
@@ -54,33 +70,62 @@ public class HangmanLogic implements IHangman {
     }
 
     // getters
-    public  String getWord() {
+    public String getWord() {
         return this.word;
     }
+
+    public String getWordDefinition() {
+        return this.wordDefinition;
+    }
+
+    public String getWordExampleBefore() {
+        return this.wordExampleBefore;
+    }
+
+    public String getWordExampleAfter() {
+        return this.wordExampleAfter;
+    }
+
     public String getVisibleWord() {
         return this.visibleWord;
     }
-    public ArrayList<String> getPossibleWords() {
+
+    public List<String> getWordSynonyms() {
+        return this.wordSynonyms;
+    }
+
+    public List<String> getPossibleWords() {
         return this.possibleWords;
     }
-    public ArrayList<String> getUsedLetters() {
+
+    public List<String> getUsedLetters() {
         return this.usedLetters;
     }
+
     public int getWrongLettersCount() {
         return this.wrongLettersCount;
     }
+
     public long getTotalTime() {
         return this.totalTime;
     }
+
     public long getCurrentSessionTime() {
         return this.currentSessionTime;
     }
+
     public int getTotalScore() {
         return this.totalScore;
     }
+
     public int getCurrentScore() {
         return this.currentScore;
     }
+
+    public int getGameType() {
+        return this.gameType;
+    }
+
     public long getInstanceLastActiveTime() {
         return this.instanceLastActiveTime;
     }
@@ -89,15 +134,19 @@ public class HangmanLogic implements IHangman {
     public boolean isLastLetterCorrect() {
         return this.lastGuessedLetterIsCorrect;
     }
+
     public boolean isGameWon() {
         return this.gameHasBeenWon;
     }
+
     public boolean isGameLost() {
         return this.gameHasBeenLost;
     }
+
     public boolean isGameOver() {
         return this.gameHasBeenLost || this.gameHasBeenWon;
     }
+
     public boolean hasGameBegun() {
         return this.hasGameBegun;
     }
@@ -105,25 +154,45 @@ public class HangmanLogic implements IHangman {
     private void updateTotalTime() {
         this.totalTime += this.currentSessionTime;
     }
+
     private void updateCurrentSessionTime() {
         this.currentSessionTime = sessionStopTime - sessionStartTime;
     }
+
     private void updateTotalScore() {
         this.totalScore += this.currentScore;
     }
+
     private void updateCurrentScore() {
         this.currentScore = calculateScore(this.currentSessionTime);
     }
+
     private void updateInstanceLastActiveTime() {
         this.instanceLastActiveTime = System.currentTimeMillis();
     }
 
     public void startNewGame(Token token) throws AuthenticationException {
         reset(token);
-        word = possibleWords.get(new Random().nextInt(possibleWords.size()));
+//        word = possibleWords.get(new Random().nextInt(possibleWords.size()));
+//        word = "car";
+
+
+            try {
+                prepareGameType();
+            } catch (InvalidWordException e) {
+                System.out.println(e.getMessage());
+            }
+
         updateVisibleWord();
         this.hasGameBegun = true;
         System.out.println(token.getUser().getUsername() + " started a new game. The new word is " + this.word);
+
+        System.out.println("Word definition: " + this.wordDefinition);
+        System.out.print("Word synonyms: ");
+        for (int i = 0; i < this.wordSynonyms.size(); i++)
+            System.out.print(this.wordSynonyms.get(i) + ", ");
+        System.out.println();
+        System.out.println("Word example: " + this.wordExampleBefore + " " + this.visibleWord + " " + this.wordExampleAfter);
         sessionStartTime = System.currentTimeMillis();
     }
 
@@ -134,6 +203,10 @@ public class HangmanLogic implements IHangman {
 
     private void reset() {
         usedLetters.clear();
+        wordSynonyms.clear();
+        wordDefinition = null;
+        wordExampleBefore = null;
+        wordExampleAfter = null;
         wrongLettersCount = 0;
         correctlyGuessedLettersCount = 0;
         gameHasBeenWon = false;
@@ -153,7 +226,6 @@ public class HangmanLogic implements IHangman {
 
     private void addDemoData() {
         possibleWords.clear();
-
         possibleWords.add("car");
         possibleWords.add("computer");
         possibleWords.add("programming");
@@ -162,6 +234,26 @@ public class HangmanLogic implements IHangman {
         possibleWords.add("walkway");
         possibleWords.add("snail");
         possibleWords.add("bird");
+    }
+
+    private void prepareGameType() throws InvalidWordException {
+//        word = possibleWords.get(new Random().nextInt(possibleWords.size()));
+        word = "dhfsh";
+        fetchWordDefinition();
+        Future<List<String>> completeableSynonyms = fetchWordSynonyms(word);
+        Future<List<String>> completableExamples = fetchWordExample(word);
+        try {
+            wordSynonyms = completeableSynonyms.get();
+            List<String> examples = completableExamples.get();
+            wordExampleBefore = examples.get(0);
+            wordExampleAfter = examples.get(1);
+            if (wordExampleBefore == null || wordExampleAfter == null) {
+                throw new InvalidWordException("Missing example sentence for word " + word);
+            }
+
+        } catch(ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void updateVisibleWord() {
@@ -178,6 +270,101 @@ public class HangmanLogic implements IHangman {
             }
         }
         visibleWord = sb.toString();
+    }
+
+    private void fetchWordDefinition() {
+//        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
+        WordService.getDefinitionAsync(word).enqueue(new Callback<Definitions>() {
+            @Override
+            public void onResponse(Call<Definitions> call, Response<Definitions> response) {
+                try {
+                    wordDefinition = response.body().getDefinitions().get(0).getDefinition();
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Couldn't find definitions for word " + word + ". Trying again...");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Definitions> call, Throwable t) {
+                System.err.println("Couldn't get definitions for " + word);
+            }
+        });
+    }
+
+    private static Future<List<String>> fetchWordSynonyms(final String word) {
+        final CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
+        List<String> wordSynonyms = new ArrayList<>();
+
+        Executors.newCachedThreadPool().submit(() -> {
+            Synonyms synonyms = WordService.getSynonymsAsync(word).execute().body();
+            for (int i = 0; i < synonyms.getSynonyms().size() && i < 6; i++) {
+                wordSynonyms.add(synonyms.getSynonyms().get(i));
+            }
+
+            return completableFuture.complete(wordSynonyms);
+        });
+
+        return completableFuture;
+    }
+
+
+
+//        WordService.getSynonymsAsync(word).execute(new Callback<Synonyms>() {
+//            @Override
+//            public void onResponse(Call<Synonyms> call, Response<Synonyms> response) {
+//                try {
+//                    for (int i = 0; i < response.body().getSynonyms().size() && i < 6; i++) {
+//                        wordSynonyms.add(response.body().getSynonyms().get(i));
+//                    }
+//                } catch(IndexOutOfBoundsException e) {
+//                    System.out.println("Couldn't find synonyms for word " + word + ". Trying again...");
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Synonyms> call, Throwable t) {
+//                System.err.println("Couldn't get synonyms for " + word);
+//            }
+//        });
+//    }
+
+    private static Future<List<String>> fetchWordExample(final String word) throws InvalidWordException{
+        final CompletableFuture<List<String>> completableFuture = new CompletableFuture<>();
+        List<String> splitExamples = new ArrayList<>();
+        Executors.newCachedThreadPool().submit(() -> {
+
+            final Examples examples = WordService.getExampleAsync(word).execute().body();
+            final String wordExample = examples.getExamples().get(0);
+            final String wordExampleBefore = wordExample.split(word)[0];
+            final String wordExampleAfter = wordExample.split(word)[1];
+            splitExamples.add(wordExampleBefore);
+            splitExamples.add(wordExampleAfter);
+//            if (splitExamples.get(0) == null || splitExamples.get(1) == null) {
+//                throw new InvalidWordException("Missing example sentence for word " + word);
+//            }
+
+            return completableFuture.complete(splitExamples);
+
+        });
+
+        return completableFuture;
+//            WordService.getExampleAsync(word).enqueue(new Callback<Examples>() {
+//                @Override
+//                public void onResponse(Call<Examples> call, Response<Examples> response) {
+//                       try {
+//                           final String wordExample = response.body().getExamples().get(0);
+//                           wordExampleBefore = wordExample.split(word)[0];
+//                           wordExampleAfter = wordExample.split(word)[1];
+//                       } catch (IndexOutOfBoundsException e) {
+//                           System.err.println("No example to fetch.");
+//                }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<Examples> call, Throwable t) {
+//                    System.err.println("Couldn't get example sentence for " + word);
+//                }
+//            });
     }
 
     public void guess(String givenLetter, Token token) throws AuthenticationException {
