@@ -2,7 +2,7 @@ package dk.localghost.hold17.dto;
 
 import java.util.List;
 
-public class Examples {
+public class Examples extends WordsApi {
     private String word;
     private List<String> examples;
 

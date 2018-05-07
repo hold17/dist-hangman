@@ -2,7 +2,7 @@ package dk.localghost.hold17.dto;
 
 import java.util.List;
 
-public class Definitions {
+public class Definitions extends WordsApi{
     private String word;
     private List<Definition> definitions;
 

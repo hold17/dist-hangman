@@ -2,7 +2,7 @@ package dk.localghost.hold17.dto;
 
 import java.util.List;
 
-public class Synonyms {
+public class Synonyms extends WordsApi {
     private String word;
     private List<String> synonyms;
 
