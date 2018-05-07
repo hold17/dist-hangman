@@ -36,5 +36,5 @@ public interface IHangman {
     void resetScoreAndTime(Token token) throws AuthenticationException;
     void guess(String givenLetter, Token token) throws AuthenticationException;
     void logStatus();
-    void getWordsFromWeb(String url, Token token) throws IOException, AuthenticationException;
+    void findWordFromServerFile(String url);
 }

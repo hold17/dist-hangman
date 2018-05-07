@@ -10,14 +10,12 @@ import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.server.database.entities.HighScoreEntity;
 import dk.localghost.hold17.transport.IHangman;
 import dk.localghost.hold17.transport.WordService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import javax.jws.WebService;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.*;
@@ -170,29 +168,25 @@ public class HangmanLogic implements IHangman {
     }
 
     public void startNewGame(Token token) throws AuthenticationException {
-        reset(token);
         while(true) {
             try {
+                reset(token);
                 prepareGameType();
                 break;
             } catch (InvalidWordException e) {
                 System.out.println(e.getMessage());
             }
         }
-        printGameStateToServerConsole(token);
         updateVisibleWord();
+        printGameStateToServerConsole(token);
         this.hasGameBegun = true;
         sessionStartTime = System.currentTimeMillis();
     }
 
     public void printGameStateToServerConsole(Token token) {
-        System.out.println(token.getUser().getUsername() + " started a new game. The new word is " + this.word);
-        System.out.println("Word definition: " + this.wordDefinition);
-        System.out.print("Word synonyms: ");
-        for (int i = 0; i < this.wordSynonyms.size(); i++)
-            System.out.print(this.wordSynonyms.get(i) + ", ");
-        System.out.println();
-        System.out.println("Word example: " + this.wordExampleBefore + " " + this.visibleWord + " " + this.wordExampleAfter);
+        System.out.println(token.getUser().getUsername()
+                + " started a new game of type " + getGameTypeAsString(gameType) + ". "
+                + " The new word is " + this.word);
     }
     public void reset(Token token) throws AuthenticationException {
         authenticateUserToken(token);
@@ -222,6 +216,7 @@ public class HangmanLogic implements IHangman {
         System.out.println(token.getUser().getUsername() + " reset their score after a lost game");
     }
 
+    //TODO: Remove this method when deemed fit, as it is technically no longer needed. Also remove the possibleWords variable.
     private void addDemoData() {
         possibleWords.clear();
         possibleWords.add("car");
@@ -235,15 +230,27 @@ public class HangmanLogic implements IHangman {
     }
 
     private void prepareGameType() throws InvalidWordException {
-        word = possibleWords.get(new Random().nextInt(possibleWords.size()));
+        findWordFromServerFile("https://db.localghost.dk/words.txt");
+        gameType = new Random().nextInt(2) + 1;
         try {
-            wordDefinition = fetchWordDefinition(word).get(1000, TimeUnit.MILLISECONDS);
-            wordSynonyms = fetchWordSynonyms(word).get(1000, TimeUnit.MILLISECONDS);
-            wordExampleBefore = fetchWordExample(word).get(1000, TimeUnit.MILLISECONDS).get(0);
-            wordExampleAfter = fetchWordExample(word).get(1000, TimeUnit.MILLISECONDS).get(1);
+            switch (gameType) {
+                case 1:
+                    wordDefinition = fetchWordDefinition(word).get(3000, TimeUnit.MILLISECONDS);
+                    wordExampleBefore = fetchWordExample(word).get(3000, TimeUnit.MILLISECONDS).get(0);
+                    wordExampleAfter = fetchWordExample(word).get(3000, TimeUnit.MILLISECONDS).get(1);
+                    break;
 
+                case 2:
+                    wordSynonyms = fetchWordSynonyms(word).get(3000, TimeUnit.MILLISECONDS);
+                    wordExampleBefore = fetchWordExample(word).get(3000, TimeUnit.MILLISECONDS).get(0);
+                    wordExampleAfter = fetchWordExample(word).get(3000, TimeUnit.MILLISECONDS).get(1);
+                    break;
+
+                default:
+                    break;
+            }
         } catch(ExecutionException | InterruptedException | TimeoutException e) {
-            throw new InvalidWordException("Missing example sentence for word " + word);
+            throw new InvalidWordException(word);
         }
     }
 
@@ -383,30 +390,22 @@ public class HangmanLogic implements IHangman {
         return sb.toString();
     }
 
-    public void getWordsFromWeb(String url, Token token) throws IOException, AuthenticationException {
-        String data = getUrl(url);
+    public void findWordFromServerFile(String address) {
+        try {
+            URL url = new URL(address);
+            Scanner scanner = new Scanner(url.openStream());
+            List<String> words = new ArrayList<>();
 
-        data = data.substring(data.indexOf("<body")). // remove headers
-                replaceAll("<.+?>", " ").toLowerCase(). // remove tags
-                replaceAll("&#198;", "æ"). // replace HTML-symbols
-                replaceAll("&#230;", "æ"). // replace HTML-symbols
-                replaceAll("&#216;", "ø"). // replace HTML-symbols
-                replaceAll("&#248;", "ø"). // replace HTML-symbols
-                replaceAll("&oslash;", "ø"). // replace HTML-symbols
-                replaceAll("&#229;", "å"). // replace HTML-symbols
-                replaceAll("[^a-zæøå]", " "). // remove symbols that aren't letters
-                replaceAll("[a-zæøå]"," "). // remove 1-letter words
-                replaceAll("[a-zæøå][a-zæøå]"," "); // remove 2-letter words
+            while(scanner.hasNextLine()) {
+                words.add(scanner.nextLine());
+            }
 
-        data = data.trim();
-
-        System.out.println("entities = " + data);
-        System.out.println("entities = " + Arrays.asList(data.split("\\s+")));
-        possibleWords.clear();
-        possibleWords.addAll(new HashSet<String>(Arrays.asList(data.split(" "))));
-
-        System.out.println("possibleWords = " + possibleWords);
-        reset(token);
+            this.word = words.get(new Random().nextInt(words.size()));
+        } catch(MalformedURLException e) {
+            e.printStackTrace();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int calculateScore(long time) {
@@ -474,6 +473,17 @@ public class HangmanLogic implements IHangman {
             sb.append(l);
         }
         return sb.toString();
+    }
+
+    public String getGameTypeAsString(int gameType) {
+        switch(gameType) {
+            case 1:
+                return "\"definitions\"";
+            case 2:
+                return "\"synonyms\"";
+            default:
+                return null;
+        }
     }
 
     private static void authenticateUserToken(Token token) throws AuthenticationException {
