@@ -218,8 +218,15 @@ public class HangmanLogic implements IHangman {
             try {
                 final Result result = fetchWordResultsAsync(word).get();
 
-                wordDefinition = result.getDefinition();
-                wordSynonyms = result.getSynonyms();
+                switch(gameType) {
+                    case 1:
+                        wordDefinition = result.getDefinition();
+                        break;
+                    case 2:
+                        wordSynonyms = result.getSynonyms();
+                        break;
+                }
+
                 final String wordExample = result.getExamples().get(0);
                 final String[] wordExamples = wordExample.split(word);
 
