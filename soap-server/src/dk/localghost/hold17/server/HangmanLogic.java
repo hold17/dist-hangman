@@ -174,7 +174,7 @@ public class HangmanLogic implements IHangman {
                 prepareGameType();
                 break;
             } catch (InvalidWordException e) {
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage());
             }
         }
         updateVisibleWord();
@@ -252,7 +252,8 @@ public class HangmanLogic implements IHangman {
             wordExampleBefore = example.get(0);
             wordExampleAfter  = example.get(1);
         } catch(ExecutionException | InterruptedException/* | TimeoutException*/ e) {
-            throw new InvalidWordException(word);
+            System.err.println(e.getMessage());
+//            throw new InvalidWordException(word);
         }
     }
 
@@ -288,7 +289,7 @@ public class HangmanLogic implements IHangman {
         });
 
          return completableFuture;
-        }
+    }
 
     private static CompletableFuture<List<String>> fetchWordSynonymsAsync(final String word) {
         final List<String> wordSynonyms = new ArrayList<>();
