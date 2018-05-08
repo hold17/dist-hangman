@@ -63,6 +63,10 @@ public class HangmanLogic implements IHangman {
         this.wrongLettersCount = hangman.getWrongLettersCount();
         this.gameHasBeenWon = hangman.isGameWon();
         this.gameHasBeenLost = hangman.isGameLost();
+        this.wordExampleBefore = hangman.getWordExampleBefore();
+        this.wordExampleAfter = hangman.getWordExampleAfter();
+        this.wordDefinition = hangman.getWordDefinition();
+        this.wordSynonyms = hangman.getWordSynonyms();
     }
 
     // getters
