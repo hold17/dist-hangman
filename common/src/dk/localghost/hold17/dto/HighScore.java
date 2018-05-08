@@ -12,6 +12,7 @@ public class HighScore {
     private String wrongLetters;
 
     public HighScore() {}
+
     public HighScore(long id, Date date, String playerName, int score, String time, String correctWord, String wrongLetters) {
         this.id = id;
         this.date = date;

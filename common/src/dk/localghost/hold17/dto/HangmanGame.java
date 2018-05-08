@@ -3,10 +3,16 @@ package dk.localghost.hold17.dto;
 import dk.localghost.hold17.transport.IHangman;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class HangmanGame {
-    private ArrayList<String> usedLetters = new ArrayList<>();
+    private List<String> usedLetters = new ArrayList<>();
     private String visibleWord;
+    private String wordDefinition;
+    private String wordExampleBefore;
+    private String wordExampleAfter;
+    private List<String> wordSynonyms;
+    private int gameType;
     private int wrongLettersCount;
     private boolean lastGuessedLetterIsCorrect;
     private boolean gameHasBeenWon;
@@ -22,10 +28,16 @@ public class HangmanGame {
 
     public HangmanGame(IHangman game) { this.setGame(game); }
 
-    public ArrayList<String> getUsedLetters() {
+    public int getGameType() { return gameType; }
+
+    public void setGameType(int gameType) {
+        this.gameType = gameType;
+    }
+
+    public List<String> getUsedLetters() {
         return usedLetters;
     }
-    public void setUsedLetters(ArrayList<String> usedLetters) {
+    public void setUsedLetters(List<String> usedLetters) {
         this.usedLetters = usedLetters;
     }
 
@@ -101,6 +113,22 @@ public class HangmanGame {
         this.score = score;
     }
 
+    public String getWordDefinition() { return wordDefinition; }
+
+    public void setWordDefinition(String wordDefinition) { this.wordDefinition = wordDefinition; }
+
+    public String getWordExampleBefore() { return wordExampleBefore; }
+
+    public void setWordExampleBefore(String wordExampleBefore) { this.wordExampleBefore = wordExampleBefore; }
+
+    public String getWordExampleAfter() { return wordExampleAfter; }
+
+    public void setWordExampleAfter(String wordExampleAfter) { this.wordExampleAfter = wordExampleAfter; }
+
+    public List<String> getWordSynonyms() { return wordSynonyms; }
+
+    public void setWordSynonyms(List<String> wordSynonyms) { this.wordSynonyms = wordSynonyms; }
+
     public String getFinalGuessWord() {
         return finalGuessWord;
     }
@@ -110,6 +138,7 @@ public class HangmanGame {
     }
 
     public void setGame(IHangman hangman) {
+        this.setGameType(hangman.getGameType());
         this.setWrongLettersCount(hangman.getWrongLettersCount());
         this.setLastGuessedLetterIsCorrect(hangman.isLastLetterCorrect());
         this.setUsedLetters(hangman.getUsedLetters());
@@ -120,6 +149,11 @@ public class HangmanGame {
         this.setHasGameBegun(hangman.hasGameBegun());
         this.setScore(hangman.getCurrentScore());
         this.setTime(hangman.getFormattedTime());
+        if (hangman.isGameOver()) this.setFinalGuessWord(hangman.getWord());
+        this.setWordDefinition(hangman.getWordDefinition());
+        this.setWordSynonyms(hangman.getWordSynonyms());
+        this.setWordExampleBefore(hangman.getWordExampleBefore());
+        this.setWordExampleAfter(hangman.getWordExampleAfter());
         if (hangman.isGameOver()) this.setFinalGuessWord(hangman.getWord());
     }
 }
