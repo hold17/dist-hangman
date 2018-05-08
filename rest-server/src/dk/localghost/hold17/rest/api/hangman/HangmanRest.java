@@ -152,6 +152,9 @@ public class HangmanRest {
             return Response.status(Response.Status.UNAUTHORIZED).entity(err).build();
         } catch (WebServiceException e) {
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
+        } catch (InvalidWordException e) {
+            ErrorObj err = new ErrorObj("invalid_word_exception", e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(err).build();
         }
         HangmanGame game = new HangmanGame(hangman);
 
