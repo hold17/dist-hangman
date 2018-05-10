@@ -268,7 +268,7 @@ public class HangmanLogic implements IHangman {
     }
 
     private static CompletableFuture<Result> fetchWordResultsAsync(final String word) {
-        final CompletableFuture<Result> completableFuture = CompletableFuture.supplyAsync(() -> {
+        return CompletableFuture.supplyAsync(() -> {
             Results results = null;
 
             try {
@@ -282,8 +282,6 @@ public class HangmanLogic implements IHangman {
 
             return result;
         });
-
-        return completableFuture;
     }
 
     public void guess(String givenLetter, Token token) throws AuthenticationException {
