@@ -56,4 +56,5 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             e.printStackTrace();
         }
     }
+
 }

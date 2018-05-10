@@ -137,4 +137,5 @@ public class HangmanClient {
             GallowDrawer.drawGallow(hangman.getWrongLettersCount());
             System.out.println("Guessed letters: " + hangman.getUsedLettersStr());
     }
+
 }

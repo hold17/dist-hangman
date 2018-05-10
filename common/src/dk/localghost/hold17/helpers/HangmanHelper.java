@@ -87,4 +87,5 @@ public class HangmanHelper {
 
         if (auth.isGameCreated(token)) auth.endGame(token);
     }
+
 }

@@ -22,7 +22,7 @@ public class DatabaseHelper {
         try {
             databaseUrl = new URL(auth.getDatabaseHandlerServiceURL() + "?wsdl");
         } catch (MalformedURLException e) {
-            throw new FatalServerException("Some url was malformed: " + e.getMessage());
+            throw new FatalServerException("Some URL was malformed: " + e.getMessage());
         }
 
         QName hangmanQname = new QName(namespaceURI, localPart);
@@ -30,4 +30,5 @@ public class DatabaseHelper {
 
         return hangmanService.getPort(IDatabaseHandler.class);
     }
+
 }

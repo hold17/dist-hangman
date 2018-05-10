@@ -122,4 +122,5 @@ public class HangmanGame {
         this.setTime(hangman.getFormattedTime());
         if (hangman.isGameOver()) this.setFinalGuessWord(hangman.getWord());
     }
+
 }

@@ -30,4 +30,5 @@ public class ErrorObj {
     public void setError_message(String error_message) {
         this.error_message = error_message;
     }
+
 }

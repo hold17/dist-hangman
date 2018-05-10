@@ -267,4 +267,5 @@ public class HangmanRest {
 
         return Response.accepted().entity(gson.toJson(hsList)).build();
     }
+
 }

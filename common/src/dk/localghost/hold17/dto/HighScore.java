@@ -65,4 +65,5 @@ public class HighScore {
     public void setWrongLetters(String wrongLetters) {
         this.wrongLetters = wrongLetters;
     }
+
 }
