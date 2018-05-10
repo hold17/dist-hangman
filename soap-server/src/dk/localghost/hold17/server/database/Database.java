@@ -51,6 +51,7 @@ public class Database {
     private Connection createConnectionObject() {
         Connection c = null;
         try {
+            // TODO: this operation might be pretty expensive... look into
             c = unWrapSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(ConnectionProvider.class).getConnection();
         } catch (SQLException e) {
             System.out.println("Something went wrong while getting connection-object");
@@ -98,6 +99,7 @@ public class Database {
         return entityManagerFactory.unwrap(SessionFactory.class);
     }
 
+    // get Hibernate interface from JPA interface
     private Session unWrapSession(EntityManager entityManager) {
         return entityManager.unwrap(Session.class);
     }
@@ -146,7 +148,6 @@ public class Database {
             try {
                 System.out.println("Checking connection validity");
                 if (entityManagerFactory != null) {
-                    // TODO: this operation might be pretty expensive... look into
                     if (connection.isValid(5)) {
                         System.out.println("Connection still running!");
                         return;
