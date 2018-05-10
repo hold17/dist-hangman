@@ -3,7 +3,6 @@ package dk.localghost.hold17.transport;
 import javax.jws.WebService;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.Token;
-import dk.localghost.hold17.helpers.InvalidWordException;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ public interface IHangman {
     boolean isGameLost();
     boolean isGameOver();
     boolean hasGameBegun();
-    void startNewGame(Token token) throws AuthenticationException, InvalidWordException;
+    void startNewGame(Token token) throws AuthenticationException;
     void reset(Token token) throws AuthenticationException;
     void resetScoreAndTime(Token token) throws AuthenticationException;
     void guess(String givenLetter, Token token) throws AuthenticationException;

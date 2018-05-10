@@ -10,7 +10,7 @@ public class WordService {
                 .baseUrl("https://wordsapiv1.p.mashape.com")
                 .addConverterFactory(GsonConverterFactory.create());
 
-    public static Call<Results> getResultsAsync(final String word) throws IndexOutOfBoundsException {
+    public static Call<Results> getResults(final String word) throws IndexOutOfBoundsException {
 
         final Retrofit retrofit = builder.build();
 

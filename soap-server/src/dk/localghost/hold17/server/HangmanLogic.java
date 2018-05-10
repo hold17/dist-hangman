@@ -2,7 +2,6 @@ package dk.localghost.hold17.server;
 
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.*;
-import dk.localghost.hold17.helpers.InvalidWordException;
 import dk.localghost.hold17.helpers.TokenHelper;
 import dk.localghost.hold17.server.database.entities.HighScoreEntity;
 import dk.localghost.hold17.transport.IHangman;
@@ -38,7 +37,7 @@ public class HangmanLogic implements IHangman {
     private long currentSessionTime;
     private long totalTime;
     private long instanceLastActiveTime;
-    private Future<Void> futurePrepareGameType;
+    private Future<CompletableFuture> futurePrepareGameType;
 
     public HangmanLogic() {
         this.hasGameBegun = false;
@@ -161,17 +160,18 @@ public class HangmanLogic implements IHangman {
         this.instanceLastActiveTime = System.currentTimeMillis();
     }
 
-    public void startNewGame(Token token) throws AuthenticationException, InvalidWordException {
+    public void startNewGame(Token token) throws AuthenticationException {
         authenticateUserToken(token);
         try {
             futurePrepareGameType.get();
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             System.err.println("CompletableFuture interrupted when starting game: ");
             e.printStackTrace();
-        } catch(ExecutionException e) {
-            throw new InvalidWordException("Game could not start. InvalidWordException at word \"" + word + "\"." +
-                    "Triggered by " + e.getCause());
+        } catch (ExecutionException e) {
+            System.err.println("CompletableFuture execution failed when starting game: ");
+            e.printStackTrace();
         }
+
         updateVisibleWord();
         printGameStateToServerConsole(token);
         this.hasGameBegun = true;
@@ -180,9 +180,10 @@ public class HangmanLogic implements IHangman {
 
     private void printGameStateToServerConsole(Token token) {
         System.out.println(token.getUser().getUsername()
-                + " started a new game of type " + getGameTypeAsString(gameType) + ". "
-                + " The new word is \"" + this.word + "\"");
+                + " started a new game of type " + getGameTypeAsString(gameType)
+                + " with word \"" + this.word + "\"");
     }
+
     public void reset(Token token) throws AuthenticationException {
         authenticateUserToken(token);
         reset();
@@ -211,14 +212,14 @@ public class HangmanLogic implements IHangman {
         System.out.println(token.getUser().getUsername() + " reset their score after a lost game");
     }
 
-    private CompletableFuture<Void> prepareGameType() {
+    private CompletableFuture<CompletableFuture> prepareGameType() {
         return CompletableFuture.supplyAsync(() -> {
             findWordFromServerFile("https://db.localghost.dk/words.txt");
             gameType = new Random().nextInt(2) + 1;
             try {
                 final Result result = fetchWordResultsAsync(word).get();
 
-                switch(gameType) {
+                switch (gameType) {
                     case 1:
                         wordDefinition = result.getDefinition();
                         break;
@@ -271,7 +272,7 @@ public class HangmanLogic implements IHangman {
             Results results = null;
 
             try {
-                results = WordService.getResultsAsync(word).execute().body();
+                results = WordService.getResults(word).execute().body();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -326,7 +327,7 @@ public class HangmanLogic implements IHangman {
     // create simple high score for single game
     private HighScoreEntity createHighScore(Token token, int score, String time, boolean saveHighScore) {
         HighScoreEntity highScoreEntity = new HighScoreEntity(
-            new Date(), token.getUser().getUsername(), score, time, this.getWord(), this.getWrongLettersStr()
+                new Date(), token.getUser().getUsername(), score, time, this.getWord(), this.getWrongLettersStr()
         );
         if (saveHighScore) dbh.putHighScoreInDatabase(highScoreEntity);
         return highScoreEntity;
@@ -355,14 +356,14 @@ public class HangmanLogic implements IHangman {
             Scanner scanner = new Scanner(url.openStream());
             List<String> words = new ArrayList<>();
 
-            while(scanner.hasNextLine()) {
+            while (scanner.hasNextLine()) {
                 words.add(scanner.nextLine());
             }
 
             this.word = words.get(new Random().nextInt(words.size())).split(",")[0];
-        } catch(MalformedURLException e) {
+        } catch (MalformedURLException e) {
             e.printStackTrace();
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -386,7 +387,7 @@ public class HangmanLogic implements IHangman {
         }
 
         double bestLetters = uniqueLetterCount; // this should maybe be another metric also taking into account how difficult the word is
-        double bestTime = WordLength*1500+500; // should vary with word length. Maybe do something more exciting
+        double bestTime = WordLength * 1500 + 500; // should vary with word length. Maybe do something more exciting
 
 //        float A = 0.9f; // higher number means bigger penalty for bad performance
 //        float B = 0.9f; // ----||----
@@ -397,8 +398,8 @@ public class HangmanLogic implements IHangman {
 //        int letterScore = (int) Math.round(baseLetterScore * Math.pow(A, (wrongGuessCount - bestLetters)));
 //        int timeScore = (int) Math.round(baseTimeScore * Math.pow(B, (timeInMillis - bestTime)));
 
-        int letterScore = (int) Math.round(baseLetterScore + letterScoreRange * Math.exp(-wrongGuessCount/bestLetters));
-        int timeScore = (int) Math.round(baseTimeScore + timeScoreRange * Math.exp(-timeInMillis/bestTime));
+        int letterScore = (int) Math.round(baseLetterScore + letterScoreRange * Math.exp(-wrongGuessCount / bestLetters));
+        int timeScore = (int) Math.round(baseTimeScore + timeScoreRange * Math.exp(-timeInMillis / bestTime));
 
         // throw a this into a Math.sqrt() to really fuck over bad players
         int score = letterScore + timeScore;
@@ -417,7 +418,7 @@ public class HangmanLogic implements IHangman {
     public String getUniqueLettersOfWord() {
         StringBuilder uniqueLetters = new StringBuilder();
 
-        for (int i=0; i < this.word.length(); i++) {
+        for (int i = 0; i < this.word.length(); i++) {
             char current = this.word.charAt(i);
             if (uniqueLetters.toString().indexOf(current) < 0)
                 uniqueLetters.append(current);
@@ -435,7 +436,7 @@ public class HangmanLogic implements IHangman {
     }
 
     public String getGameTypeAsString(int gameType) {
-        switch(gameType) {
+        switch (gameType) {
             case 1:
                 return "\"definitions\"";
             case 2:

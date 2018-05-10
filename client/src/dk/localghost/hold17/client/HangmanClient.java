@@ -4,7 +4,6 @@ import dk.localghost.authwrapper.dto.User;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.authwrapper.transport.ConnectivityException;
 import dk.localghost.hold17.dto.Token;
-import dk.localghost.hold17.helpers.InvalidWordException;
 import dk.localghost.hold17.ui.GallowDrawer;
 import dk.localghost.hold17.transport.IAuthentication;
 import dk.localghost.hold17.transport.IHangman;
@@ -95,12 +94,9 @@ public class HangmanClient {
     public void startGame() throws AuthenticationException {
         if (hangman == null) throw new NullPointerException("Connection to server was unsuccessful, hangman object is still null.");
 
-        if (!hangman.hasGameBegun()) try {
+        if (!hangman.hasGameBegun())
             hangman.startNewGame(token);
-        } catch (InvalidWordException e) {
             System.err.println("InvalidWordException at \"" + hangman.getWord() + "\"");
-            e.printStackTrace();
-        }
 
         System.out.println("Game has started. The word has " + hangman.getVisibleWord().length() + " letters.\n");
 
