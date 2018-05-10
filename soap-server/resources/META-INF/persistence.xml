@@ -10,8 +10,9 @@
         <class>dk.localghost.hold17.server.database.entities.HighScoreEntity</class>
 
         <properties>
-            <property name="javax.persistence.jdbc.driver"
-                      value="com.mysql.jdbc.Driver" />
+            <!-- Apparently this is not needed with mysql-connector-java-8.0.X -->
+            <!--<property name="hibernate.connection.driver_class"-->
+                      <!--value="com.mysql.cj.jdbc.Driver" />-->
             <property name="hibernate.dialect"
                       value="org.hibernate.dialect.MySQL57Dialect" />
         </properties>
