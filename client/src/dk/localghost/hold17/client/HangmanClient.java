@@ -20,13 +20,7 @@ public class HangmanClient {
     private IHangman hangman;
     private Token token;
 
-//    private String address;
-//    private int port;
-
     HangmanClient(String address, int port) throws AuthenticationException, MalformedURLException {
-//        this.address = address;
-//        this.port = port;
-
         auth = connectToAuthenticationService(address, port);
 
         token = authenticateUser();
