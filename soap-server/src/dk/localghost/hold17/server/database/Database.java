@@ -26,7 +26,6 @@ public class Database {
     )
     private EntityManagerFactory entityManagerFactory;
 
-    private static Database instance;
     private static Properties properties;
     private static Connection connection;
 
@@ -37,16 +36,33 @@ public class Database {
         new Thread(connectionTestThread).start();
     }
 
-    public static Database getInstance() {
-        if(instance == null){
-            synchronized (Database.class) {
-                if(instance == null){
-                    instance = new Database();
-                }
-            }
-        }
-        return instance;
+    // Initialization-on-demand holder idiom (look it up on wikipedia)
+    private static class LazyHolder {
+        static final Database INSTANCE = new Database();
     }
+
+    public static Database getInstance() {
+        return LazyHolder.INSTANCE;
+    }
+
+
+//    private Database() {
+//        properties = loadDatabaseSettingsFromFile();
+//        createEntityManagerFactory(properties);
+//        ConnectionTestThread connectionTestThread = new ConnectionTestThread();
+//        new Thread(connectionTestThread).start();
+//    }
+//
+//    public static Database getInstance() {
+//        if(instance == null){
+//            synchronized (Database.class) {
+//                if(instance == null){
+//                    instance = new Database();
+//                }
+//            }
+//        }
+//        return instance;
+//    }
 
     private Connection createConnectionObject() {
         Connection c = null;
