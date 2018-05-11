@@ -43,7 +43,6 @@ public class HangmanLogic implements IHangman {
         this.hasGameBegun = false;
         updateInstanceLastActiveTime();
         reset();
-        futurePrepareGameType = prepareGameType();
     }
 
     // this is never used because the service is always open until manually closed
@@ -160,6 +159,12 @@ public class HangmanLogic implements IHangman {
         this.instanceLastActiveTime = System.currentTimeMillis();
     }
 
+    // All of our many setter reside beneath this line
+    public void setGameType(int gameType) {
+        this.gameType = gameType;
+    }
+
+
     public void startNewGame(Token token) throws AuthenticationException {
         authenticateUserToken(token);
         try {
@@ -199,6 +204,7 @@ public class HangmanLogic implements IHangman {
         correctlyGuessedLettersCount = 0;
         gameHasBeenWon = false;
         gameHasBeenLost = false;
+        futurePrepareGameType = prepareGameType();
     }
 
     public void resetScoreAndTime(Token token) throws AuthenticationException {

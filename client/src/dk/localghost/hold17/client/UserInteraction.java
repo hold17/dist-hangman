@@ -22,8 +22,7 @@ public class UserInteraction {
                 break;
         }
 
-        System.out.println("You typed: " + letter);
-
+        System.out.println("\n\n\n\n\n\n");
         return letter;
     }
 
