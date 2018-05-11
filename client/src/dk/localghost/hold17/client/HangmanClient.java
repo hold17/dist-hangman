@@ -94,7 +94,8 @@ public class HangmanClient {
     public void startGame() throws AuthenticationException {
         if (hangman == null) throw new NullPointerException("Connection to server was unsuccessful, hangman object is still null.");
 
-        if (!hangman.hasGameBegun()) hangman.startNewGame(token);
+        if (!hangman.hasGameBegun())
+            hangman.startNewGame(token);
 
         System.out.println("Game has started. The word has " + hangman.getVisibleWord().length() + " letters.\n");
 
