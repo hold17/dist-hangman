@@ -153,6 +153,7 @@ public class HangmanRest {
         } catch (WebServiceException e) {
             return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(gson.toJson(ErrorBuilder.buildServiceUnavailable())).build();
         }
+
         HangmanGame game = new HangmanGame(hangman);
 
         return Response.accepted().entity(gson.toJson(game)).build();
