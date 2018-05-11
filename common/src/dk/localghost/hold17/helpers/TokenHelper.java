@@ -1,8 +1,10 @@
 package dk.localghost.hold17.helpers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.localghost.authwrapper.dto.User;
 import dk.localghost.hold17.dto.Token;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 
@@ -59,4 +61,5 @@ public class TokenHelper {
 
         return true;
     }
+
 }

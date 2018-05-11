@@ -41,9 +41,9 @@ public class GallowDrawer {
             case 1: steps[2] += head; break;
         }
 
-
         for (String s : steps) {
             System.out.println(s);
         }
     }
+
 }

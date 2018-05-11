@@ -156,4 +156,5 @@ public class HangmanGame {
         this.setWordExampleAfter(hangman.getWordExampleAfter());
         if (hangman.isGameOver()) this.setFinalGuessWord(hangman.getWord());
     }
+
 }

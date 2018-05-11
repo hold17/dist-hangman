@@ -381,25 +381,14 @@ public class HangmanLogic implements IHangman {
         if (gameHasBeenLost) {
             letterScoreRange /= 2;
             timeScoreRange /= 2;
-
         }
 
         double bestLetters = uniqueLetterCount; // this should maybe be another metric also taking into account how difficult the word is
         double bestTime = WordLength * 1500 + 500; // should vary with word length. Maybe do something more exciting
 
-//        float A = 0.9f; // higher number means bigger penalty for bad performance
-//        float B = 0.9f; // ----||----
-
-        // These formulas are hard and I gave up getting them to work :(
-        // Fucking plot this shit to figure out some numbers that work
-        // Find a way around actual time being higher than best time messing shit up
-//        int letterScore = (int) Math.round(baseLetterScore * Math.pow(A, (wrongGuessCount - bestLetters)));
-//        int timeScore = (int) Math.round(baseTimeScore * Math.pow(B, (timeInMillis - bestTime)));
-
         int letterScore = (int) Math.round(baseLetterScore + letterScoreRange * Math.exp(-wrongGuessCount / bestLetters));
         int timeScore = (int) Math.round(baseTimeScore + timeScoreRange * Math.exp(-timeInMillis / bestTime));
 
-        // throw a this into a Math.sqrt() to really fuck over bad players
         int score = letterScore + timeScore;
 
         return score;

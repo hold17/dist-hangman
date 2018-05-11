@@ -5,7 +5,6 @@ import javax.xml.ws.Endpoint;
 import java.nio.file.Paths;
 
 public class Server {
-    private static final DatabaseHandler dbh = new DatabaseHandler();
     public static int PORT = 1099;
     public static String ADDRESS = "[::]";
     public static final String ADDRESS_AUTH = "auth";
@@ -27,13 +26,17 @@ public class Server {
             System.out.println(args[1] + " is not a number.");
             System.exit(1);
         }
+
         IAuthentication auth = new Authentication();
         Endpoint.publish("http://" + ADDRESS + ":" + PORT + "/" + ADDRESS_AUTH, auth);
 
-        String thePath = Paths.get("").toAbsolutePath().toString() + "/dbsettings.properties";
-        thePath = thePath.replace("//", "/");
+        // print the path on which we are looking for the dbsettings.properties as paths in java are confusing
+        final String currentPath = Paths.get("").toAbsolutePath().toString() + "\\dbsettings.properties";
+        final String propertiesPath = currentPath.replace("//", "/");
 
-        System.out.println("Looking for " + thePath);
+        System.out.println("Looking for " + propertiesPath);
+
         System.out.println("Server started on " + ADDRESS + " port " + PORT);
     }
+
 }

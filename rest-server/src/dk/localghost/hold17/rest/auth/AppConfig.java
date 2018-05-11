@@ -6,4 +6,4 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
 @ApplicationPath(Routes.OAUTH_ROOT)
-public class AppConfig extends Application { }
+public class AppConfig extends Application {}

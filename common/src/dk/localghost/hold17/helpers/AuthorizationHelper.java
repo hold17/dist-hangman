@@ -4,6 +4,7 @@ import dk.localghost.hold17.transport.IAuthentication;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -27,4 +28,5 @@ public class AuthorizationHelper {
             return null;
         }
     }
+
 }

@@ -21,4 +21,5 @@ public class FatalServerException extends Exception {
     public FatalServerException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(standardMessage + message, cause, enableSuppression, writableStackTrace);
     }
+
 }
