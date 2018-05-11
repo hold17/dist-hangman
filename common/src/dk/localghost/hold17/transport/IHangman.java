@@ -35,4 +35,5 @@ public interface IHangman {
     void guess(String givenLetter, Token token) throws AuthenticationException;
     void logStatus();
     void findWordFromServerFile(String url);
+    void setGameType(int gameType);
 }
