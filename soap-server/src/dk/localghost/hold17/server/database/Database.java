@@ -181,7 +181,7 @@ public class Database {
         @Override
         public void run() {
             System.out.println("ConnectionTestThread Started");
-            executor.scheduleAtFixedRate(this::testConnection, 0, 10L, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(this::testConnection, 0, 5L, TimeUnit.MINUTES);
         }
     }
 
