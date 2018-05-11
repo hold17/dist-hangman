@@ -59,12 +59,12 @@
             <dependency>
                 <groupId>org.hibernate</groupId>
                 <artifactId>hibernate-core</artifactId>
-                <version>5.2.15.Final</version>
+                <version>5.2.17.Final</version>
             </dependency>
             <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
-                <version>5.1.45</version>
+                <version>8.0.11</version>
             </dependency>
             <dependency>
                 <groupId>com.thetransactioncompany</groupId>
