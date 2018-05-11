@@ -141,7 +141,7 @@ public class HangmanClient {
         // find gametype and print hint string accordingly
         switch (hangman.getGameType()) {
             case 1: {
-                System.out.println(hangman.getWordDefinition());
+                System.out.println("Definition: " + hangman.getWordDefinition());
                 break;
             }
             case 2: {
