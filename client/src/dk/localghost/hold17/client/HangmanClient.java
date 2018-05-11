@@ -96,7 +96,6 @@ public class HangmanClient {
 
         if (!hangman.hasGameBegun())
             hangman.startNewGame(token);
-            System.err.println("InvalidWordException at \"" + hangman.getWord() + "\"");
 
         System.out.println("Game has started. The word has " + hangman.getVisibleWord().length() + " letters.\n");
 
