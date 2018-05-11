@@ -34,7 +34,6 @@ public class DatabaseHandler implements IDatabaseHandler {
             e.printStackTrace();
         }
         return props;
-        //properties = props;
     }
 
     public List<HighScore> getHighScoreList() {
@@ -44,4 +43,5 @@ public class DatabaseHandler implements IDatabaseHandler {
     public void putHighScoreInDatabase(HighScoreEntity hs) {
         db.insertNewHighScore(hs);
     }
+
 }
