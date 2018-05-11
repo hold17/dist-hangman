@@ -1,8 +1,9 @@
 package dk.localghost.hold17.transport;
 
-import javax.jws.WebService;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.Token;
+
+import javax.jws.WebService;
 
 import java.util.List;
 

@@ -6,6 +6,7 @@ import dk.localghost.hold17.transport.IHangman;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -87,4 +88,5 @@ public class HangmanHelper {
 
         if (auth.isGameCreated(token)) auth.endGame(token);
     }
+
 }
