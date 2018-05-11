@@ -3,8 +3,7 @@
              xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
              version="2.0">
 
-    <!--TODO: rename to something production ready-->
-    <persistence-unit name="testdatabase">
+    <persistence-unit name="highscoreDB">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <class>dk.localghost.hold17.server.database.entities.HighScoreEntity</class>

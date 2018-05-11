@@ -21,8 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Database {
     @PersistenceUnit(
-        // TODO: rename to something production ready
-        unitName = "testdatabase"
+        unitName = "highscoreDB"
     )
     private EntityManagerFactory entityManagerFactory;
 
@@ -44,25 +43,6 @@ public class Database {
     public static Database getInstance() {
         return LazyHolder.INSTANCE;
     }
-
-
-//    private Database() {
-//        properties = loadDatabaseSettingsFromFile();
-//        createEntityManagerFactory(properties);
-//        ConnectionTestThread connectionTestThread = new ConnectionTestThread();
-//        new Thread(connectionTestThread).start();
-//    }
-//
-//    public static Database getInstance() {
-//        if(instance == null){
-//            synchronized (Database.class) {
-//                if(instance == null){
-//                    instance = new Database();
-//                }
-//            }
-//        }
-//        return instance;
-//    }
 
     private Connection createConnectionObject() {
         Connection c = null;
@@ -98,15 +78,13 @@ public class Database {
     }
 
     private void createEntityManagerFactory(Properties props) throws ExceptionInInitializerError {
-        // TODO: rename to something production ready
         try {
-            entityManagerFactory = Persistence.createEntityManagerFactory("testdatabase", props);
+            entityManagerFactory = Persistence.createEntityManagerFactory("highscoreDB", props);
         } catch (ExceptionInInitializerError e) {
             System.out.println("Connection to database failed. Check error log!");
             e.printStackTrace();
             throw e;
         }
-
         connection = createConnectionObject();
     }
 
