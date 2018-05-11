@@ -6,6 +6,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.exception.JDBCConnectionException;
+import org.hibernate.service.spi.ServiceException;
 
 import javax.persistence.*;
 import java.io.FileInputStream;
@@ -51,7 +52,7 @@ public class Database {
             c = unWrapSessionFactory().getSessionFactoryOptions().getServiceRegistry().getService(ConnectionProvider.class).getConnection();
         } catch (SQLException e) {
             System.out.println("Something went wrong while getting connection-object");
-            e.printStackTrace();
+//            e.printStackTrace();
         }
         return c;
     }
@@ -77,12 +78,12 @@ public class Database {
         return props;
     }
 
-    private void createEntityManagerFactory(Properties props) throws ExceptionInInitializerError {
+    private void createEntityManagerFactory(Properties props) throws ServiceException {
         try {
             entityManagerFactory = Persistence.createEntityManagerFactory("highscoreDB", props);
-        } catch (ExceptionInInitializerError e) {
+        } catch (ServiceException e) {
             System.out.println("Connection to database failed. Check error log!");
-            e.printStackTrace();
+            //e.printStackTrace();
             throw e;
         }
         connection = createConnectionObject();
@@ -105,7 +106,7 @@ public class Database {
             entityManager.getTransaction().begin();
             entityManager.persist(highScoreEntity);
             entityManager.getTransaction().commit();
-        } catch (JDBCConnectionException e) {
+        } catch (JDBCConnectionException | IllegalStateException e) {
             System.out.println("Database connection error. Check Database status.");
             e.printStackTrace();
         } finally {
@@ -116,33 +117,37 @@ public class Database {
     public List<HighScore> getListOfHighScores() {
         EntityManager entityManager = entityManagerFactory.createEntityManager();
 
-//        try {
+        List<HighScoreEntity> result = null;
+        try {
             entityManager.getTransaction().begin();
-            List<HighScoreEntity> result = entityManager.createQuery("from HighScoreEntity order by score desc", HighScoreEntity.class).getResultList();
+            result = entityManager.createQuery("from HighScoreEntity order by score desc", HighScoreEntity.class).getResultList();
             entityManager.getTransaction().commit();
-//        } catch () {
-
-//        } finally {
+        } catch (JDBCConnectionException | IllegalStateException e) {
+            System.out.println("Database connection error. Check Database status.");
+            e.printStackTrace();
+        } finally {
             entityManager.close();
-//        }
+        }
 
         List<HighScore> convertedResult = new ArrayList<>();
-        for (HighScoreEntity hs : result) {
-            convertedResult.add(new HighScore(hs.getId(), hs.getDate(), hs.getPlayerName(), hs.getScore(), hs.getTime(), hs.getCorrectWord(), hs.getWrongLetters()));
+        if (result != null) {
+            for (HighScoreEntity hs : result) {
+                convertedResult.add(new HighScore(hs.getId(), hs.getDate(), hs.getPlayerName(), hs.getScore(), hs.getTime(), hs.getCorrectWord(), hs.getWrongLetters()));
+            }
+        } else {
+            convertedResult.add(new HighScore(0, new Date(System.currentTimeMillis()), "ERROR!", 0, "DATABASE", "CONNECTION", "DOWN"));
         }
         return convertedResult;
     }
-
-
 
     private class ConnectionTestThread implements Runnable {
         final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
         public void testConnection() {
+            System.out.println(new Date(System.currentTimeMillis()).toString() + ": Checking connection validity");
             try {
-                System.out.println("Checking connection validity");
                 if (entityManagerFactory != null) {
-                    if (connection.isValid(5)) {
+                    if (connection.isValid(2)) {
                         System.out.println("Connection still running!");
                         return;
                     } else {
@@ -151,20 +156,29 @@ public class Database {
                     }
                 }
 
-                try {
-                    System.out.println("Attempting service restart");
-                    createEntityManagerFactory(properties);
-                } catch (ExceptionInInitializerError e) {
-                    System.out.println("Failed to reconnect. Trying again in 10 seconds.");
-                    e.printStackTrace();
-                }
+                while(!connection.isValid(2)) {
+                    try {
+                        System.out.println(new Date(System.currentTimeMillis()).toString() + ": Attempting service restart");
+                        createEntityManagerFactory(properties);
+                    } catch (ServiceException e) {
+                        System.out.println("Failed to reconnect. Trying again in 10 seconds.");
+                        //e.printStackTrace();
+                        entityManagerFactory.close();
 
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException ie) {
+                            System.err.println("Sleep interrupted!");
+                        }
+                    }
+                }
             } catch (SQLException e) {
                 System.out.println("testConnection failed");
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
 
+        @Override
         public void run() {
             System.out.println("ConnectionTestThread Started");
             executor.scheduleAtFixedRate(this::testConnection, 0, 10L, TimeUnit.SECONDS);
