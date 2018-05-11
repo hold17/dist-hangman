@@ -4,7 +4,6 @@ import javax.jws.WebService;
 import dk.localghost.authwrapper.transport.AuthenticationException;
 import dk.localghost.hold17.dto.Token;
 
-import java.io.IOException;
 import java.util.List;
 
 @WebService
@@ -15,7 +14,6 @@ public interface IHangman {
     String getWordExampleAfter();
     String getVisibleWord();
     List<String> getWordSynonyms();
-    List<String> getPossibleWords();
     List<String> getUsedLetters();
     String getUsedLettersStr();
     String getUniqueLettersOfWord();

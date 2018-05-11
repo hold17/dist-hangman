@@ -1,13 +1,8 @@
 package dk.localghost.hold17.helpers;
 
-import dk.localghost.hold17.dto.Definitions;
 import dk.localghost.hold17.dto.Token;
 import dk.localghost.hold17.transport.IAuthentication;
 import dk.localghost.hold17.transport.IHangman;
-import dk.localghost.hold17.transport.WordService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
