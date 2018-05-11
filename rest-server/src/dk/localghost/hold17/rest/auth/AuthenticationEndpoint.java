@@ -65,5 +65,6 @@ public class AuthenticationEndpoint {
     @NameBinding
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE, ElementType.METHOD})
-    public @interface Auth { }
+    public @interface Auth {}
+
 }

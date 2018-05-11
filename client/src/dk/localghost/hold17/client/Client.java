@@ -42,6 +42,6 @@ public class Client {
         } catch (AuthenticationException e) {
             System.err.println(e.getMessage() + " Please log in again.");
         }
-
     }
+
 }

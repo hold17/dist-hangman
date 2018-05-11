@@ -36,4 +36,5 @@ public class Auth {
 
         System.out.println("E-mail has been successfully sent.");
     }
+
 }

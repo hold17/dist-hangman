@@ -45,4 +45,5 @@ public class Validation {
     public Response iAmATeapot() {
         return Response.status(418).entity("No tea here, sorry.").build();
     }
+
 }
